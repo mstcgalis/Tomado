@@ -2,7 +2,6 @@ import rumps
 import os
 import json
 import time
-from rumps.rumps import notification
 
 class Tomado(object):
     def __init__(self):
@@ -51,7 +50,7 @@ class Tomado(object):
             "autostart_break": True,
         }
         #establishing a path to prefs
-        self.prefs_filename = os.path.join(self.folder, "prefs.json")
+        self.prefs_filename = str(os.path.join(self.folder, "prefs.json"))
         #loading prefs from the json, if it exists
         try: 
             with open(self.prefs_filename, "r") as f:
@@ -65,7 +64,7 @@ class Tomado(object):
         with self.app.open("data.json", "a") as data:
             pass
         #save the fle path to the data file
-        self.data_filename = os.path.join(self.folder, 'data.json')
+        self.data_filename = str(os.path.join(self.folder, 'data.json'))
         #create the variables for stats
         self.pomodoros_today = 0
         self.pomodoro_time_today = 0
@@ -74,11 +73,11 @@ class Tomado(object):
 
         ##GENERAL BUTTONS
         #session menu item is created as a rumps.MenuItem
-        self.session_info = rumps.MenuItem(f"Session info", callback=self.update_session_info)
+        self.session_info = rumps.MenuItem("Session info", callback=self.update_session_info)
         #end session button
         self.end_session_button = rumps.MenuItem("End Session", callback=self.end_session, key="e")
         #debug button
-        self.debug_button = rumps.MenuItem("Debug/Test", callback=self.debug_test)
+        self.about_button = rumps.MenuItem("About Tomado", callback=self.debug_test)
         #preferences button
         self.prefereces_button = rumps.MenuItem("Preferences")
         #pomodoro length setting
@@ -120,33 +119,33 @@ class Tomado(object):
 
         ##POMODORO BUTTONS
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_pomodoro_button = rumps.MenuItem("Start Pomodoro", callback=self.start_timer, key="s")
+        self.start_pomodoro_button = rumps.MenuItem("Start Pomodoro", callback=self.start_timer, key="s", icon="icons/start.png")
         #pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_pomodoro_button = rumps.MenuItem("Pause Pomodoro", callback=self.pause_timer, key="s")
+        self.pause_pomodoro_button = rumps.MenuItem("Pause Pomodoro", callback=self.pause_timer, key="s", icon="icons/pause.png")
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_pomodoro_button = rumps.MenuItem("Continue Pomodoro", callback=self.continue_timer, key="s")
+        self.continue_pomodoro_button = rumps.MenuItem("Continue Pomodoro", callback=self.continue_timer, key="s", icon="icons/start.png")
         #the reset_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.reset_pomodoro_button = rumps.MenuItem("Reset Pomodoro", callback=self.reset_timer, key="r")
+        self.reset_pomodoro_button = rumps.MenuItem("Reset Pomodoro", callback=self.reset_timer, key="r", icon="icons/reset.png")
 
         ##BREAK BUTTONS
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_break_button = rumps.MenuItem("Start Break", callback=self.start_timer, key="s")
+        self.start_break_button = rumps.MenuItem("Start Break", callback=self.start_timer, key="s", icon="icons/start.png")
         #pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_break_button = rumps.MenuItem("Pause Break", callback=self.pause_timer, key="s")
+        self.pause_break_button = rumps.MenuItem("Pause Break", callback=self.pause_timer, key="s", icon="icons/pause.png")
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_break_button = rumps.MenuItem("Continue Break", callback=self.continue_timer, key="s")
+        self.continue_break_button = rumps.MenuItem("Continue Break", callback=self.continue_timer, key="s", icon="icons/start.png")
         #the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.skip_break_button = rumps.MenuItem("Skip Break", callback=self.skip_timer, key="r")
+        self.skip_break_button = rumps.MenuItem("Skip Break", callback=self.skip_timer, key="r", icon="icons/skip.png")
 
         ##LONG BUTTONS
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_long_button = rumps.MenuItem("Start Long Break", callback=self.start_timer, key="s")
+        self.start_long_button = rumps.MenuItem("Start Long Break", callback=self.start_timer, key="s", icon="icons/start.png")
         #pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_long_button = rumps.MenuItem("Pause Long Break", callback=self.pause_timer, key="s")
+        self.pause_long_button = rumps.MenuItem("Pause Long Break", callback=self.pause_timer, key="s", icon="icons/pause.png")
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_long_button = rumps.MenuItem("Continue Long Break", callback=self.continue_timer, key="s")
+        self.continue_long_button = rumps.MenuItem("Continue Long Break", callback=self.continue_timer, key="s", icon="icons/start.png")
         #the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.skip_long_button = rumps.MenuItem("Skip Long Break", callback=self.skip_timer, key="r")
+        self.skip_long_button = rumps.MenuItem("Skip Long Break", callback=self.skip_timer, key="r", icon="icons/skip.png")
 
         ##MENUS
         self.menus = {"default_menu" : 
@@ -173,7 +172,7 @@ class Tomado(object):
                     ]
                 ],
                 None,
-                self.debug_button]
+                self.about_button]
             }
         
         ##DEFAULT menu and state
