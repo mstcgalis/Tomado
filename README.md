@@ -1,7 +1,7 @@
 # Tomado 🍅
 Simple MacOS Pomodoro Timer that lives in your menu bar 🌱
 
-part of _self.governance(software)_
+part of `self.governance(software)`
 - https://www.are.na/daniel-galis/self-governance
 
 ---
