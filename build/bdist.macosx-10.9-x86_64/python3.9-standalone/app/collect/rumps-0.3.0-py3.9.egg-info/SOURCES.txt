@@ -1,0 +1,17 @@
+CHANGES.rst
+MANIFEST.in
+README.rst
+setup.cfg
+setup.py
+rumps/__init__.py
+rumps/compat.py
+rumps/notifications.py
+rumps/rumps.py
+rumps/utils.py
+rumps.egg-info/PKG-INFO
+rumps.egg-info/SOURCES.txt
+rumps.egg-info/dependency_links.txt
+rumps.egg-info/requires.txt
+rumps.egg-info/top_level.txt
+rumps/packages/__init__.py
+rumps/packages/ordereddict.py

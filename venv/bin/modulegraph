@@ -1,4 +1,4 @@
-#!/Users/admin/Desktop/FaVU/tomado/venv/bin/python
+#!/Users/admin/Desktop/tomado/Tomado/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
