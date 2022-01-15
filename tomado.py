@@ -1,5 +1,4 @@
 import rumps
-import os
 import json
 import time
 
@@ -20,12 +19,12 @@ class Tomado(object):
         self.session_general = [
             "pomodoro",
             "break",
-            # "pomodoro",
-            # "break",
-            # "pomodoro",
-            # "break",
-            # "pomodoro",
-            # "long_break",
+            "pomodoro",
+            "break",
+            "pomodoro",
+            "break",
+            "pomodoro",
+            "long_break",
         ]
         #dictionary representing the active session made from the session_general
         self.session = {}
@@ -43,14 +42,14 @@ class Tomado(object):
         ##PREFERENCES
         #default prefs
         self.default_prefs = {
-            "pomodoro_length": 25,
-            "break_length": 5,
-            "long_length": 15,
+            "pomodoro_length": 1500,
+            "break_length": 300,
+            "long_length": 900,
             "autostart_pomodoro": True,
             "autostart_break": True,
         }
         #establishing a path to prefs
-        self.prefs_filename = str(os.path.join(self.folder, "prefs.json"))
+        self.prefs_filename = str(self.folder + "/prefs.json")
         #loading prefs from the json, if it exists
         try: 
             with open(self.prefs_filename, "r") as f:
@@ -60,11 +59,11 @@ class Tomado(object):
             self.prefs = self.default_prefs    
         
         ##STATS
-        #open the data file if it exists, create one if it doesnt
-        with self.app.open("data.json", "a") as data:
-            pass
         #save the fle path to the data file
-        self.data_filename = str(os.path.join(self.folder, 'data.json'))
+        self.data_filename = str(self.folder + '/data.json')
+        #open the data file if it exists, create one if it doesnt
+        with open(self.data_filename, "a") as data:
+            pass
         #create the variables for stats
         self.pomodoros_today = 0
         self.pomodoro_time_today = 0
@@ -76,16 +75,18 @@ class Tomado(object):
         self.session_info = rumps.MenuItem("Session info", callback=self.update_session_info)
         #end session button
         self.end_session_button = rumps.MenuItem("End Session", callback=self.end_session, key="e")
-        #debug button
-        self.about_button = rumps.MenuItem("About Tomado", callback=self.debug_test)
+        #about button
+        self.about_button = rumps.MenuItem("About Tomado", callback=self.about_info)
+        #about window
+        self.window = rumps.Window("made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n2022\nGPL-3.0 License", "About Tomado", dimensions=(-1,-1))
         #preferences button
         self.prefereces_button = rumps.MenuItem("Preferences")
         #pomodoro length setting
         self.pomodoro_length_button = rumps.MenuItem("Pomodoro Length")
-        pomodoro_length_options = ["5", "15", "20", "25", "30", "40", "45", "60"]
+        pomodoro_length_options = ["15", "20", "25", "30", "40", "45", "60"]
         self.pomodoro_length_options = []
         for n in pomodoro_length_options:
-            button = rumps.MenuItem(f"{n} Minutes", callback=self.change_length)
+            button = rumps.MenuItem("{} Minutes".format(n), callback=self.change_length)
             button.type = "pomodoro"
             self.pomodoro_length_options.append(button)
         #break length setting
@@ -93,7 +94,7 @@ class Tomado(object):
         break_length_options = ["3", "5", "10", "15", "20"]
         self.break_length_options = []
         for n in break_length_options:
-            button = rumps.MenuItem(f"{n} Minutes", callback=self.change_length)
+            button = rumps.MenuItem("{} Minutes".format(n), callback=self.change_length)
             button.type = "break"
             self.break_length_options.append(button)
         #long break length setting
@@ -101,7 +102,7 @@ class Tomado(object):
         long_length_options = ["10", "15", "20", "25", "30"]
         self.long_length_options = []
         for n in long_length_options:
-            button = rumps.MenuItem(f"{n} Minutes", callback=self.change_length)
+            button = rumps.MenuItem("{} Minutes".format(n), callback=self.change_length)
             button.type = "long"
             self.long_length_options.append(button)
         #autostart pomodoros
@@ -113,9 +114,9 @@ class Tomado(object):
         #today stats submenu
         self.today_button = rumps.MenuItem("Today")
         #shows time tracked today
-        self.today_pomodoros = rumps.MenuItem(f"Pomodoros:", callback=self.not_clickable)
+        self.today_pomodoros = rumps.MenuItem("Pomodoros:", callback=self.not_clickable)
         #shows pomodoros tracked today
-        self.today_breakes = rumps.MenuItem(f"Breakes:", callback=self.not_clickable)
+        self.today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
 
         ##POMODORO BUTTONS
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
@@ -209,7 +210,7 @@ class Tomado(object):
             new_session = True
             #upate stats from json
         #change the title to the current interval
-        self.app.title = self.secs_to_time(self.prefs.get(f"{self.current_interval_type()}_length"))
+        self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.current_interval_type())))
         #update the mene buttons
         self.update_menu()
         #update the session info
@@ -288,12 +289,12 @@ class Tomado(object):
                     #add the full clock
                     string += self.config.get("clock_full")
         #set the title of the session info to the string
-        self.session_info.title = f"Session: {string}"
+        self.session_info.title = "Session: {}".format(string)
 
     #method for creating a new session from session_general
     def create_session(self, general):
         for c, interval in enumerate(general):
-            self.session[f"{interval}_{c}"] = False
+            self.session["{}_{}".format(interval, c)] = False
 
     #method for ending and saving a session
     def end_session(self, sender):
@@ -391,8 +392,8 @@ class Tomado(object):
                 #add its length to the break time counter 
                 self.breakes_time_today += length
         #pass the stats into the approapriate buttons
-        self.today_pomodoros.title = f"Pomodoros: {self.pomodoros_today} = {self.secs_to_time(self.pomodoro_time_today)}"
-        self.today_breakes.title = f"Breakes: {self.breakes_today} = {self.secs_to_time(self.breakes_time_today)}"
+        self.today_pomodoros.title = "Pomodoros: {} = {}".format(self.pomodoros_today, self.secs_to_time(self.pomodoro_time_today))
+        self.today_breakes.title = "Breakes: {} = {}".format(self.breakes_today, self.secs_to_time(self.breakes_time_today))
 
 
 
@@ -420,7 +421,7 @@ class Tomado(object):
     #autostart toggle method, activated by the buttons
     def autostart_toggle(self, sender):
         #change the preferences value to the other bool
-        self.prefs[f"autostart_{sender.type}"] = not self.prefs[f"autostart_{sender.type}"]
+        self.prefs["autostart_{}".format(sender.type)] = not self.prefs["autostart_{}".format(sender.type)]
         #change the state to the other one
         if sender.state == 0:
             sender.state = 1
@@ -433,20 +434,20 @@ class Tomado(object):
         #loop through the list of options/buttons
         for option in self.pomodoro_length_options:
             #if the first word (number) of the button title is the same as the number in preferences
-            if int(option.title.split()[0]) == self.prefs.get("pomodoro_length"):
+            if int(option.title.split()[0]) * 60 == self.prefs.get("pomodoro_length"):
                 #make the button active
                 option.state = 1
         for option in self.break_length_options:
-            if int(option.title.split()[0]) == self.prefs.get("break_length"):
+            if int(option.title.split()[0]) * 60 == self.prefs.get("break_length"):
                 option.state = 1
         for option in self.long_length_options:
-            if int(option.title.split()[0]) == self.prefs.get("long_length"):
+            if int(option.title.split()[0]) * 60 == self.prefs.get("long_length"):
                 option.state = 1
 
     #change the length of an interval
     def change_length(self, sender):
         #change the interval length value in prefs
-        self.prefs[f"{sender.type}_length"] = int(sender.title.split()[0])
+        self.prefs["{}_length".format(sender.type)] = int(sender.title.split()[0]) * 60
         #get the type of interval and select the matching list of option buttons
         if sender.type == "pomodoro":
             options = self.pomodoro_length_options
@@ -464,7 +465,7 @@ class Tomado(object):
         #if there isnt an active interval
         if self.timer.count == 0:
             #set the menu bar timer to the new length
-            self.app.title = self.secs_to_time(self.prefs.get(f"{self.current_interval_type()}_length"))
+            self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.current_interval_type())))
         self.save_preferances()
 
     ##NOTIFICATIONS
@@ -508,7 +509,7 @@ class Tomado(object):
     #method for starting the timer
     def start_timer(self, sender):
         #define the timer length from preferences
-        self.timer.end = self.prefs.get(f"{self.current_interval_type()}_length")
+        self.timer.end = self.prefs.get("{}_length".format(self.current_interval_type()))
         #start the timer
         self.timer.start()
         #update the session info
@@ -598,46 +599,9 @@ class Tomado(object):
                 self.start_timer(sender="")
     
     #debug method for testing
-    def debug_test(self, sender):
-        pomodoros_today = 0
-        pomodoro_time_today = 0
-        breaks_today = 0
-        breaks_time_today = 0
-        #from the saved_sessions dict, get todays dict of sessions using todays date in the Y_M_D (2022_1_13) format as the key
-        sessions_today = self.saved_sessions[time.strftime("%Y_%m_%d",time.localtime(time.time()))]
-        #loop through todays sessions without their epoch time keys
-        for session in sessions_today.values():
-            #in each session, loop thourgh the intervals and length they elapsed
-            for interval, length in session.items():
-                #if its a pomodoro interval
-                if interval.split("_")[0] == "pomodoro":
-                    #add one to the pomodoro counter
-                    pomodoros_today += 1
-                    #add its length to the pomodoro time counter
-                    pomodoro_time_today += length
-                #else it is a break or long break
-                else:
-                    #add one to the break counter
-                    breaks_today += 1
-                    #add its length to the break time counter
-                    breaks_time_today += length
-        print("from saved:", {"pomodoros_today":pomodoros_today, "pomodoros_time_today":pomodoro_time_today, "breaks_today":breaks_today, "breaks_time_today":breaks_time_today})        
-        #add stats from the current session
-        for interval, length in self.session.items():
-        #if its a pomodoro interval and it has already elapsed some time
-            if interval.split("_")[0] == "pomodoro" and type(length) != bool:
-                #add one to the pomodoro counter
-                pomodoros_today += 1
-                #add its length to the pomodoro time counter
-                pomodoro_time_today += length
-            #else it is a break or long break and it has already elapsed some time
-            elif type(length) != bool:
-                #add one to the break counter
-                breaks_today += 1
-                #add its length to the break time counter 
-                breaks_time_today += length
-        print("current:", {"pomodoros_today":pomodoros_today, "pomodoros_time_today":pomodoro_time_today, "breaks_today":breaks_today, "breaks_time_today":breaks_time_today})
-    
+    def about_info(self, sender):
+        self.window.run()
+
     #not clickable
     def not_clickable(self, sender):
         print("this is not clickable")

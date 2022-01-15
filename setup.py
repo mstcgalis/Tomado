@@ -20,7 +20,7 @@ OPTIONS = {
     'plist': {
         'LSUIElement': True,
     },
-    'packages': ['rumps', 'json', 'time', 'os'],
+    'packages': ['rumps'],
 }
 
 setup(
