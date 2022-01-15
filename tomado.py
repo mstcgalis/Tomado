@@ -10,9 +10,9 @@ class Tomado(object):
             "pomodoro_message": "Pomodoro is over. Take a break 🌱",
             "break_message": "Break has concluded. Time to focus 🍅",
             "long_message": "Session is finished. Good joob! ✨",
-            "clock_empty": "􀐫",
-            "clock_half": "􁆸",
-            "clock_full": "􀐬",
+            "clock_empty": "◯ ",
+            "clock_half": "⏳",
+            "clock_full": "🍅",
         }
         #SESSION
         #list representing the order and number and type of intervals in a session
@@ -196,6 +196,7 @@ class Tomado(object):
 
     #method for setting the app to the default menu and resetting timer
     def loaded_state(self):
+        print("hello")
         #create a variable representing whether a new session has been started
         new_session = False
         #stop the current timer
@@ -277,7 +278,7 @@ class Tomado(object):
             #if the item starts with "pomodoro"
             if interval.split("_")[0] == "pomodoro":
                 #if the interval is the current interval and there is time in the timer
-                if interval == self.current_interval() and self.timer.count > 0:
+                if interval == self.current_interval() and self.timer.is_alive() == True:
                     #add the half-full clock
                     string += self.config.get("clock_half")
                 #if the interval has a value type bool, aka it has not been started yet
@@ -512,8 +513,6 @@ class Tomado(object):
         self.timer.end = self.prefs.get("{}_length".format(self.current_interval_type()))
         #start the timer
         self.timer.start()
-        #update the session info
-        self.update_session_info()
         #replace the start button to the pause button
         if self.current_interval_type() == "pomodoro":
             self.replace_menu_item(self.start_pomodoro_button, self.pause_pomodoro_button)
@@ -521,6 +520,8 @@ class Tomado(object):
             self.replace_menu_item(self.start_break_button, self.pause_break_button)
         if self.current_interval_type() == "long":
             self.replace_menu_item(self.start_long_button, self.pause_long_button)
+        #update the session info
+        self.update_session_info()
     
     #method for stoping the timer
     def stop_timer(self):
