@@ -118,7 +118,7 @@ class Tomado(object):
         self.autostart_break_button.type = "break"
         #sound options
         self.sound_options_button = rumps.MenuItem("Timer sound")
-        sounds = ["Beep", "Birds", "Ding", "Cicada", "Wood"]
+        sounds = ["Beep", "Birds", "Ding", "Cicadas", "Wood"]
         self.sound_options = []
         for sound in sounds:
             button = rumps.MenuItem(title=sound, callback=self.change_sound)
