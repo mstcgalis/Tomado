@@ -7,7 +7,7 @@ OPTIONS = {
     'plist': {
         'LSUIElement': True,
     },
-    'packages': ['rumps'],
+    'packages': ['rumps', 'playsound'],
     'iconfile': "tomado.icns",
 }
 

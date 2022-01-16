@@ -1,6 +1,7 @@
 import rumps
 import json
 import time
+from playsound import playsound
 
 class Tomado(object):
     def __init__(self):
@@ -529,6 +530,9 @@ class Tomado(object):
             self.replace_menu_item(self.start_long_button, self.pause_long_button)
         #update the session info
         self.update_session_info()
+        #play a feedback sound
+        playsound("button.mp3")
+        print("hello")
     
     #method for stoping the timer
     def stop_timer(self):
