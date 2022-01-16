@@ -1,6 +1,10 @@
 # Tomado 🍅
 Simple MacOS Pomodoro Timer that lives in your menu bar 🌱
 
+Thank you for your interest! ❤️
+
+Not all functionality has been tested yet. Please create a Pull Request or Issue if you encounter an error. I'm also always open to talk 🌱
+
 ## Installation
 
 1. Download the latest [release]()
