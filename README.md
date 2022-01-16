@@ -1,10 +1,6 @@
 # Tomado 🍅
 Simple MacOS Pomodoro Timer that lives in your menu bar 🌱
 
-part of `self.governance(software)`
-- https://www.are.na/daniel-galis/self-governance
-- https://www.are.na/daniel-galis/tomado
-
 ## Installation
 
 1. Download the latest [release]()
@@ -15,4 +11,6 @@ part of `self.governance(software)`
 
 ---
 
-made with ❤️, care and patience by Daniel Gális - www.danielgalis.com
+made with ❤️, care and patience by [Daniel Gális](www.danielgalis.com)
+
+part of [self.governance(software)](https://www.are.na/daniel-galis/self-governance)
