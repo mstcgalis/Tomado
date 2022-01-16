@@ -1,3 +1,4 @@
+from subprocess import call
 import rumps
 import json
 import time
@@ -49,6 +50,7 @@ class Tomado(object):
             "long_length": 900,
             "autostart_pomodoro": True,
             "autostart_break": True,
+            "timer_sound": "sounds/beep.mp3"
         }
         #establishing a path to prefs
         self.prefs_filename = str(self.folder + "/prefs.json")
@@ -113,6 +115,13 @@ class Tomado(object):
         #autostart breakes
         self.autostart_break_button = rumps.MenuItem("Autostart Breakes", callback=self.autostart_toggle)
         self.autostart_break_button.type = "break"
+        #sound options
+        self.sound_options_button = rumps.MenuItem("Timer sound")
+        sounds = ["Beep", "Birds", "Ding", "Cicada", "Wood"]
+        self.sound_options = []
+        for sound in sounds:
+            button = rumps.MenuItem(title=sound, callback=self.change_sound)
+            self.sound_options.append(button)
         #today stats submenu
         self.today_button = rumps.MenuItem("Today")
         #shows time tracked today
@@ -171,7 +180,10 @@ class Tomado(object):
                         self.long_length_options],
                     None,
                     self.autostart_pomodoro_button,
-                    self.autostart_break_button
+                    self.autostart_break_button,
+                    None,
+                    [self.sound_options_button, 
+                        self.sound_options]
                     ]
                 ],
                 None,
@@ -191,6 +203,8 @@ class Tomado(object):
         self.startup_display_length()
         #show the right state for the autostart buttons
         self.startup_display_autostart()
+        #show the right state for the sound options
+        self.startup_display_sound()
 
     #METHODS
 
@@ -402,7 +416,7 @@ class Tomado(object):
     ##PREFERENCES
 
     #save preferences to a file after change
-    def save_preferances(self):
+    def save_preferences(self):
         with open(self.prefs_filename, "w") as f:
             json.dump(self.prefs, f)
 
@@ -429,7 +443,7 @@ class Tomado(object):
             sender.state = 1
         else:
             sender.state = 0
-        self.save_preferances()
+        self.save_preferences()
 
     #startup - display the selected interval length from preferences - WORKS
     def startup_display_length(self):
@@ -468,7 +482,25 @@ class Tomado(object):
         if self.timer.count == 0:
             #set the menu bar timer to the new length
             self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.current_interval_type())))
-        self.save_preferances()
+        self.save_preferences()
+
+    #load the correct sound from prefs on autostart
+    def startup_display_sound(self):
+    #loop through the list of options/buttons
+        for option in self.sound_options:
+            #if the title of the button is the same as the file in preferences
+            if "sounds/" + option.title.lower() + ".mp3" == self.prefs.get("timer_sound"):
+                #make the button active
+                option.state = 1
+
+    #chnge the timer sound
+    def change_sound(self, sender):
+        self.prefs["timer_sound"] = "sounds/" + sender.title.lower() + ".mp3"
+        sender.state = 1
+        for sound in self.sound_options:
+            if sound.title != sender.title:
+                sound.state = 0
+        self.save_preferences()
 
     ##NOTIFICATIONS
 
@@ -517,6 +549,9 @@ class Tomado(object):
 
     #method for starting the timer
     def start_timer(self, sender):
+        if sender.title.split()[0] == "Start":
+            #play a sound
+            playsound("sounds/button.mp3")
         #define the timer length from preferences
         self.timer.end = self.prefs.get("{}_length".format(self.current_interval_type()))
         #start the timer
@@ -530,12 +565,10 @@ class Tomado(object):
             self.replace_menu_item(self.start_long_button, self.pause_long_button)
         #update the session info
         self.update_session_info()
-        #play a feedback sound
-        playsound("button.mp3")
-        print("hello")
     
     #method for stoping the timer
     def stop_timer(self):
+        playsound(self.prefs.get("timer_sound"))
         #stop the timer
         self.timer.stop()
         self.timer.end = 0
@@ -553,6 +586,7 @@ class Tomado(object):
         #autostart if a new session hasnt been started
         if not new_session:
             if self.prefs.get("autostart_pomodoro") == True and self.current_interval_type() == "pomodoro":
+                print("now")
                 self.start_timer(sender="")
             if self.prefs.get("autostart_break") == True and self.current_interval_type() == "break":
                 self.start_timer(sender="")
@@ -574,6 +608,9 @@ class Tomado(object):
 
     #method for continuing the timer
     def continue_timer(self, sender):
+        if sender.title.split()[0] == "Continue":
+            #play a sound
+            playsound("sounds/button.mp3")
         #start the timer
         self.timer.start()
         #replace the continue button woth the pause button
