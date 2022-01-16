@@ -10,6 +10,7 @@ class Tomado(object):
             "pomodoro_message": "Pomodoro is over. Take a break 🌱",
             "break_message": "Break has concluded. Time to focus 🍅",
             "long_message": "Session is finished. Good joob! ✨",
+            "not_clickable_message": "This button is not clickable yet, sorry 🌸",
             "clock_empty": "◯ ",
             "clock_half": "⏳",
             "clock_full": "🍅",
@@ -72,7 +73,7 @@ class Tomado(object):
 
         ##GENERAL BUTTONS
         #session menu item is created as a rumps.MenuItem
-        self.session_info = rumps.MenuItem("Session info", callback=self.update_session_info)
+        self.session_info = rumps.MenuItem("Session info", callback=self.not_clickable)
         #end session button
         self.end_session_button = rumps.MenuItem("End Session", callback=self.end_session, key="e")
         #about button
@@ -196,7 +197,6 @@ class Tomado(object):
 
     #method for setting the app to the default menu and resetting timer
     def loaded_state(self):
-        print("hello")
         #create a variable representing whether a new session has been started
         new_session = False
         #stop the current timer
@@ -492,6 +492,13 @@ class Tomado(object):
                 subtitle="",
                 message=self.config["long_message"])
 
+    #not clickable notification
+    def not_clickable_notification(self):
+        rumps.notification(
+                title=self.config["app_name"],
+                subtitle="",
+                message=self.config["not_clickable_message"])
+
     ##TIMER
 
     #method passed in as a callback into rumps.Timer, will happen every second
@@ -605,7 +612,7 @@ class Tomado(object):
 
     #not clickable
     def not_clickable(self, sender):
-        print("this is not clickable")
+        self.not_clickable_notification()
 
     
     ##APP
