@@ -1,7 +1,7 @@
 from setuptools import setup
 
 APP = ['Tomado.py']
-DATA_FILES = ["tomado.icns", 'icons']
+DATA_FILES = ["tomado.icns", 'icons', 'sounds']
 OPTIONS = {
     'argv_emulation': True,
     'plist': {
