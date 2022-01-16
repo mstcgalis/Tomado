@@ -50,6 +50,7 @@ class Tomado(object):
             "long_length": 900,
             "autostart_pomodoro": True,
             "autostart_break": True,
+            "allow_sound": True,
             "timer_sound": "sounds/beep.mp3"
         }
         #establishing a path to prefs
@@ -509,28 +510,38 @@ class Tomado(object):
         rumps.notification(
                 title=self.config["app_name"],
                 subtitle="",
-                message=self.config["pomodoro_message"])
+                message=self.config["pomodoro_message"],
+                sound=False)
+        if self.prefs.get("allow_sound"):
+            playsound(self.prefs.get("timer_sound"))
     
     #break notification
     def break_notification(self):
         rumps.notification(
                 title=self.config["app_name"],
                 subtitle="",
-                message=self.config["break_message"])
+                message=self.config["break_message"],
+                sound=False)
+        if self.prefs.get("allow_sound"):
+            playsound(self.prefs.get("timer_sound"))
 
     #long break notification
     def long_notification(self):
         rumps.notification(
                 title=self.config["app_name"],
                 subtitle="",
-                message=self.config["long_message"])
+                message=self.config["long_message"],
+                sound=False)
+        if self.prefs.get("allow_sound"):
+            playsound(self.prefs.get("timer_sound"))
 
     #not clickable notification
     def not_clickable_notification(self):
         rumps.notification(
                 title=self.config["app_name"],
                 subtitle="",
-                message=self.config["not_clickable_message"])
+                message=self.config["not_clickable_message"],
+                sound=False)
 
     ##TIMER
 
@@ -549,9 +560,12 @@ class Tomado(object):
 
     #method for starting the timer
     def start_timer(self, sender):
-        if sender.title.split()[0] == "Start":
-            #play a sound
-            playsound("sounds/button.mp3")
+        #check if the function is being triggered by a button
+        try: 
+            if sender.title.split()[0] == "Start" and self.prefs.get("allow_sound"):
+            #if yes, play a sound
+                playsound("sounds/button.mp3")
+        except: pass
         #define the timer length from preferences
         self.timer.end = self.prefs.get("{}_length".format(self.current_interval_type()))
         #start the timer
@@ -568,7 +582,6 @@ class Tomado(object):
     
     #method for stoping the timer
     def stop_timer(self):
-        playsound(self.prefs.get("timer_sound"))
         #stop the timer
         self.timer.stop()
         self.timer.end = 0
@@ -586,7 +599,6 @@ class Tomado(object):
         #autostart if a new session hasnt been started
         if not new_session:
             if self.prefs.get("autostart_pomodoro") == True and self.current_interval_type() == "pomodoro":
-                print("now")
                 self.start_timer(sender="")
             if self.prefs.get("autostart_break") == True and self.current_interval_type() == "break":
                 self.start_timer(sender="")
@@ -608,7 +620,7 @@ class Tomado(object):
 
     #method for continuing the timer
     def continue_timer(self, sender):
-        if sender.title.split()[0] == "Continue":
+        if sender.title.split()[0] == "Continue" and self.prefs.get("allow_sound"):
             #play a sound
             playsound("sounds/button.mp3")
         #start the timer
@@ -623,11 +635,19 @@ class Tomado(object):
 
     #method for reseting the timer
     def reset_timer(self, sender):
+        if self.prefs.get("allow_sound"):
+            #play a sound
+            playsound("sounds/button.mp3")
         #load the next interval
         self.loaded_state()
+        #start the timer
+        self.start_timer(sender="")
 
     #method for skiping the timer
     def skip_timer(self, sender):
+        if self.prefs.get("allow_sound"):
+            #play a sound
+            playsound("sounds/button.mp3")
         #if the timer has not started yet
         if self.timer.count == 0:
             self.session[self.current_interval()] = 0
@@ -654,7 +674,6 @@ class Tomado(object):
     #not clickable
     def not_clickable(self, sender):
         self.not_clickable_notification()
-
     
     ##APP
     #method to run this app
