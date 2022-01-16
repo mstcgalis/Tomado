@@ -5,8 +5,8 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 
 ## Installation
 
-1. Download Tomado-Installer.dmg from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.1.0-alpha)
-2. Mount the .dmg and move `Tomado.app` to `Applications`
+1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.1.0-alpha)
+2. Mount the `.dmg` and move `Tomado.app` to `Applications`
 3. Open Tomado
 4. Go to `System Preferences -> Security & Privacy -> General -> click "Open Anyway"`
 5. You're done! 😊
