@@ -1,14 +1,14 @@
 from setuptools import setup
 
 APP = ['Tomado.py']
-DATA_FILES = ["tomado.icns", 'icons', 'sounds']
+DATA_FILES = ["icons/tomado.icns", 'icons', 'sounds']
 OPTIONS = {
     'argv_emulation': True,
     'plist': {
         'LSUIElement': True,
     },
     'packages': ['rumps', 'playsound'],
-    'iconfile': "tomado.icns",
+    'iconfile': "icons/tomado.icns",
 }
 
 setup(
