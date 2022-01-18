@@ -564,7 +564,7 @@ class Tomado(object):
         try: 
             if sender.title.split()[0] == "Start" and self.prefs.get("allow_sound"):
             #if yes, play a sound
-                playsound("sounds/button.mp3")
+                playsound("sounds/button.mp3", False)
         except: pass
         #define the timer length from preferences
         self.timer.end = self.prefs.get("{}_length".format(self.current_interval_type()))
@@ -622,7 +622,7 @@ class Tomado(object):
     def continue_timer(self, sender):
         if sender.title.split()[0] == "Continue" and self.prefs.get("allow_sound"):
             #play a sound
-            playsound("sounds/button.mp3")
+            playsound("sounds/button.mp3", False)
         #start the timer
         self.timer.start()
         #replace the continue button woth the pause button
