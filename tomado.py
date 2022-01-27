@@ -82,8 +82,6 @@ class Tomado(object):
         self.end_session_button = rumps.MenuItem("End Session", callback=self.end_session, key="e")
         #about button
         self.about_button = rumps.MenuItem("About Tomado", callback=self.about_info)
-        #about window
-        self.window = rumps.Window("made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n2022\nGPL-3.0 License", "About Tomado", dimensions=(-1,-1))
         #preferences button
         self.prefereces_button = rumps.MenuItem("Preferences")
         #pomodoro length setting
@@ -129,36 +127,38 @@ class Tomado(object):
         self.today_pomodoros = rumps.MenuItem("Pomodoros:", callback=self.not_clickable)
         #shows pomodoros tracked today
         self.today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
+        #toggled sounds
+        self.allow_sounds_button = rumps.MenuItem("Allow Sounds", callback=self.toggle_sounds)
 
         ##POMODORO BUTTONS
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_pomodoro_button = rumps.MenuItem("Start Pomodoro", callback=self.start_timer, key="s", icon="icons/start.png")
+        self.start_pomodoro_button = rumps.MenuItem("Start Pomodoro", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
         #pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_pomodoro_button = rumps.MenuItem("Pause Pomodoro", callback=self.pause_timer, key="s", icon="icons/pause.png")
+        self.pause_pomodoro_button = rumps.MenuItem("Pause Pomodoro", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_pomodoro_button = rumps.MenuItem("Continue Pomodoro", callback=self.continue_timer, key="s", icon="icons/start.png")
+        self.continue_pomodoro_button = rumps.MenuItem("Continue Pomodoro", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
         #the reset_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.reset_pomodoro_button = rumps.MenuItem("Reset Pomodoro", callback=self.reset_timer, key="r", icon="icons/reset.png")
+        self.reset_pomodoro_button = rumps.MenuItem("Reset Pomodoro", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
         ##BREAK BUTTONS
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_break_button = rumps.MenuItem("Start Break", callback=self.start_timer, key="s", icon="icons/start.png")
+        self.start_break_button = rumps.MenuItem("Start Break", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
         #pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_break_button = rumps.MenuItem("Pause Break", callback=self.pause_timer, key="s", icon="icons/pause.png")
+        self.pause_break_button = rumps.MenuItem("Pause Break", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_break_button = rumps.MenuItem("Continue Break", callback=self.continue_timer, key="s", icon="icons/start.png")
+        self.continue_break_button = rumps.MenuItem("Continue Break", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
         #the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.skip_break_button = rumps.MenuItem("Skip Break", callback=self.skip_timer, key="r", icon="icons/skip.png")
+        self.skip_break_button = rumps.MenuItem("Skip Break", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
 
         ##LONG BUTTONS
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_long_button = rumps.MenuItem("Start Long Break", callback=self.start_timer, key="s", icon="icons/start.png")
+        self.start_long_button = rumps.MenuItem("Start Long Break", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
         #pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_long_button = rumps.MenuItem("Pause Long Break", callback=self.pause_timer, key="s", icon="icons/pause.png")
+        self.pause_long_button = rumps.MenuItem("Pause Long Break", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_long_button = rumps.MenuItem("Continue Long Break", callback=self.continue_timer, key="s", icon="icons/start.png")
+        self.continue_long_button = rumps.MenuItem("Continue Long Break", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
         #the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.skip_long_button = rumps.MenuItem("Skip Long Break", callback=self.skip_timer, key="r", icon="icons/skip.png")
+        self.skip_long_button = rumps.MenuItem("Skip Long Break", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
 
         ##MENUS
         self.menus = {"default_menu" : 
@@ -183,6 +183,7 @@ class Tomado(object):
                     self.autostart_pomodoro_button,
                     self.autostart_break_button,
                     None,
+                    self.allow_sounds_button,
                     [self.sound_options_button, 
                         self.sound_options]
                     ]
@@ -206,6 +207,7 @@ class Tomado(object):
         self.startup_display_autostart()
         #show the right state for the sound options
         self.startup_display_sound()
+        self.startup_toggle_sounds()
 
     #METHODS
 
@@ -445,6 +447,24 @@ class Tomado(object):
         else:
             sender.state = 0
         self.save_preferences()
+    
+    #autostart method to display correct info on start up
+    def startup_toggle_sounds(self):
+        if self.prefs.get("allow_sound"):
+            self.allow_sounds_button.state = 1
+        else:
+            self.allow_sounds_button.state = 0
+    
+    #toggle sounds
+    def toggle_sounds(self, sender):
+        #change the preferences value to the other bool
+        self.prefs["allow_sound"] = not self.prefs["allow_sound"]
+        #change the state to the other one
+        if sender.state == 0:
+            sender.state = 1
+        else:
+            sender.state = 0
+        self.save_preferences()
 
     #startup - display the selected interval length from preferences - WORKS
     def startup_display_length(self):
@@ -669,7 +689,7 @@ class Tomado(object):
     
     #debug method for testing
     def about_info(self, sender):
-        self.window.run()
+        rumps.alert("About Tomado", "made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n2022\nGPL-3.0 License")
 
     #not clickable
     def not_clickable(self, sender):
