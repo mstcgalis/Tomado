@@ -9,13 +9,16 @@ class Tomado(object):
         ##CONFIG
         self.config = {
             "app_name" : "Tomado",
-            "pomodoro_message": "Pomodoro is over. Take a break 🌱",
-            "break_message": "Break has concluded. Time to focus 🍅",
-            "long_message": "Session is finished. Good joob! ✨",
+            "pomodoro_message": "Pomodoro is over. Take a break! 🪴",
+            "break_message": "Break has concluded. Time to focus! 🍅",
+            "long_message": "Session is finished. Good joob! 🌻",
             "not_clickable_message": "This button is not clickable yet, sorry 🌸",
             "clock_empty": "◯ ",
             "clock_half": "⏳",
             "clock_full": "🍅",
+            "pomodoro_symbol" : "icons/pomodoro.png",
+            "break_symbol" : "icons/break.png",
+            "long_symbol" : "icons/long.png"
         }
         #SESSION
         #list representing the order and number and type of intervals in a session
@@ -34,9 +37,9 @@ class Tomado(object):
         
         ##APP, TIMER
         #the quit button is changed to say Quit Tomado and the shortcut key is added
-        self.quit_button = rumps.MenuItem("Quit Tomado", key="q")
+        self.quit_button = rumps.MenuItem("Quit Tomado", callback=self.quit, key="q")
         #variable containing the rumps.App class
-        self.app = rumps.App("Tomado", quit_button=self.quit_button)
+        self.app = rumps.App("Tomado", quit_button=None)
         #variable containing the rumps.Timer class, arugments are its callback functions and a 1 second interval
         self.timer = rumps.Timer(self.tick, 1)
         #creates support folder if there isnt one
@@ -125,8 +128,10 @@ class Tomado(object):
         self.today_button = rumps.MenuItem("Today")
         #shows time tracked today
         self.today_pomodoros = rumps.MenuItem("Pomodoros:", callback=self.not_clickable)
+        self.today_pomodoros.icon = self.config.get("pomodoro_symbol")
         #shows pomodoros tracked today
         self.today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
+        self.today_breakes.icon = self.config.get("break_symbol")
         #toggled sounds
         self.allow_sounds_button = rumps.MenuItem("Allow Sounds", callback=self.toggle_sounds)
 
@@ -137,6 +142,8 @@ class Tomado(object):
         self.pause_pomodoro_button = rumps.MenuItem("Pause Pomodoro", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.continue_pomodoro_button = rumps.MenuItem("Continue Pomodoro", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
+        #the skip_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
+        self.skip_pomodoro_button = rumps.MenuItem("Skip Pomodoro", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
         #the reset_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
         self.reset_pomodoro_button = rumps.MenuItem("Reset Pomodoro", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
@@ -149,6 +156,8 @@ class Tomado(object):
         self.continue_break_button = rumps.MenuItem("Continue Break", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
         #the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
         self.skip_break_button = rumps.MenuItem("Skip Break", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
+        #the reset_break button is created as a rumps.MenuItem, callback will be reset_timer method
+        self.reset_break_button = rumps.MenuItem("Reset Break", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
         ##LONG BUTTONS
         #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
@@ -163,7 +172,8 @@ class Tomado(object):
         ##MENUS
         self.menus = {"default_menu" : 
                 [self.start_pomodoro_button, 
-                self.reset_pomodoro_button, 
+                self.reset_pomodoro_button,
+                self.skip_pomodoro_button, 
                 None, 
                 self.session_info,
                 self.end_session_button,
@@ -189,7 +199,8 @@ class Tomado(object):
                     ]
                 ],
                 None,
-                self.about_button]
+                self.about_button,
+                self.quit_button]
             }
         
         ##DEFAULT menu and state
@@ -230,6 +241,7 @@ class Tomado(object):
             #upate stats from json
         #change the title to the current interval
         self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.current_interval_type())))
+        self.app.icon = self.config.get("{}_symbol".format(self.current_interval_type())) 
         #update the mene buttons
         self.update_menu()
         #update the session info
@@ -248,22 +260,29 @@ class Tomado(object):
     def update_menu(self):
         self.app.menu.pop(self.app.menu.keys()[0])
         self.app.menu.pop(self.app.menu.keys()[0])
+        self.app.menu.pop(self.app.menu.keys()[0])
         if self.current_interval_type() == "pomodoro":
             self.app.menu.insert_before(self.app.menu.keys()[0], self.start_pomodoro_button)
             self.app.menu.insert_before(self.app.menu.keys()[1], self.reset_pomodoro_button)
+            self.app.menu.insert_before(self.app.menu.keys()[2], self.skip_pomodoro_button)
         if self.current_interval_type() == "break":
             self.app.menu.insert_before(self.app.menu.keys()[0], self.start_break_button)
-            self.app.menu.insert_before(self.app.menu.keys()[1], self.skip_break_button)
+            self.app.menu.insert_before(self.app.menu.keys()[1], self.reset_break_button)
+            self.app.menu.insert_before(self.app.menu.keys()[2], self.skip_break_button)
         if self.current_interval_type() == "long":
             self.app.menu.insert_before(self.app.menu.keys()[0], self.start_long_button)
-            self.app.menu.insert_before(self.app.menu.keys()[1], self.skip_long_button)
+            self.app.menu.insert_before(self.app.menu.keys()[1], self.reset_break_button)
+            self.app.menu.insert_before(self.app.menu.keys()[2], self.skip_long_button)
     
-    #fuction that takes an integer of seconds and returns a minutes:seconds string
-    def secs_to_time(self, time_left):
-        mins, secs = divmod(time_left, 60)
-        # mins = time_left // 60 if time_left >= 0 else time_left // 60 + 1
-        # secs = time_left % 60 if time_left >= 0 else (-1 * time_left) % 60
-        return '{:02d}:{:02d}'.format(mins, secs)
+    #method that takes an integer of seconds and returns a minutes:seconds string, or a hours:minutes:seconds string
+    def secs_to_time(self, seconds, format = "minutes"):
+        if format == "hours":
+            hours, secs = divmod(seconds, 3600)
+            mins, secs = divmod(secs, 60)
+            return '{}h {:02d}m'.format(hours, mins)
+        else:
+            mins, secs = divmod(seconds, 60)
+            return '{:02d}:{:02d}'.format(mins, secs)
 
     ##SESSION
 
@@ -351,6 +370,7 @@ class Tomado(object):
 
     
     ##STATS
+
     #method for loading todays stats from data
     def load_today_stats(self, sender):
         #reset the stats to zero
@@ -411,8 +431,8 @@ class Tomado(object):
                 #add its length to the break time counter 
                 self.breakes_time_today += length
         #pass the stats into the approapriate buttons
-        self.today_pomodoros.title = "Pomodoros: {} = {}".format(self.pomodoros_today, self.secs_to_time(self.pomodoro_time_today))
-        self.today_breakes.title = "Breakes: {} = {}".format(self.breakes_today, self.secs_to_time(self.breakes_time_today))
+        self.today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, self.secs_to_time(self.pomodoro_time_today, format="hours"))
+        self.today_breakes.title = "{} Breakes = {}".format(self.breakes_today, self.secs_to_time(self.breakes_time_today, format="hours"))
 
 
 
@@ -573,6 +593,7 @@ class Tomado(object):
         time_left = sender.end - sender.count
         #the menu bar title gets changed to the remaining time coverted by a function
         self.app.title = self.secs_to_time(time_left+1)
+        self.app.icon = self.config.get("{}_symbol".format(self.current_interval_type()))
         #if there is no remaining time
         if time_left < 0:
             #stop the timer
@@ -698,7 +719,11 @@ class Tomado(object):
     ##APP
     #method to run this app
     def run(self):
-        self.app.run()   
+        self.app.run()
+    
+    def quit(self, sender):
+        self.end_session(sender=None)
+        rumps.quit_application(sender=None)
 
 if __name__ == "__main__":
     app = Tomado()
