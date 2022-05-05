@@ -477,7 +477,7 @@ class Tomado(object):
                 # make the button active
                 option.state = 1
     
-    #autostart toggle method, activated by the buttons
+    # toggles autostart
     def autostart_toggle(self, sender):
         #change the preferences value to the other bool
         self.prefs["autostart_{}".format(sender.type)] = not self.prefs["autostart_{}".format(sender.type)]
@@ -488,10 +488,11 @@ class Tomado(object):
             sender.state = 0
         self.save_preferences()
 
-    # change the length of an interval
+    # changes the length of an interval
     def change_length(self, sender):
         # change the interval length value in prefs
         self.prefs["{}_length".format(sender.type)] = int(sender.title.split()[0]) * 60
+        
         # get the type of interval and select the matching list of option buttons
         if sender.type == "pomodoro":
             options = self.pomodoro_length_options
@@ -499,16 +500,16 @@ class Tomado(object):
             options = self.break_length_options
         if sender.type == "long":
             options = self.long_length_options
-        #make the state of the sender active
-        sender.state = 1
-        #loop through the options
+        # loop through the options
         for option in options:
-            #if the option is not the sender, make it inactive
-            if option.title != sender.title:
-                option.state = 0
-        #if there isnt an active interval
+            # make them inactive
+            option.state = 0
+        # make the state of the sender active
+        sender.state = 1
+
+        # if there isnt an active interval
         if self.timer.count == 0:
-            #set the menu bar timer to the new length
+            #set the menu bar timer text to the new length
             self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.current_interval_type())))
         self.save_preferences()
 
@@ -534,7 +535,7 @@ class Tomado(object):
         self.save_preferences()
     
     ## NOTIFICATIONS
-    # pomodoro notification
+    # interval notification
     def notification(self, type):
         rumps.notification(
                 title=self.config["app_name"],
@@ -553,7 +554,7 @@ class Tomado(object):
                 sound=False)
 
     ## TIMER
-    # method passed in as a callback into rumps.Timer, will happen every second
+    # triggered every second
     def tick(self, sender):
         #add one to the counter
         sender.count += 1
@@ -567,7 +568,7 @@ class Tomado(object):
             #stop the timer
             self.stop_timer()
 
-    # method for starting the timer
+    # starts the timer
     def start_timer(self, sender):
         #check if the function is being triggered by a button
         try: 
@@ -589,7 +590,7 @@ class Tomado(object):
         #update the session info
         self.update_session_info()
     
-    #method for stoping the timer
+    # stops the timer
     def stop_timer(self):
         #stop the timer
         self.timer.stop()
@@ -610,7 +611,7 @@ class Tomado(object):
                 self.start_timer(sender="")
 
 
-    #method for pausing the timer
+    # pauses the timer
     def pause_timer(self, sender):
         #stop the timer
         self.timer.stop()
@@ -622,7 +623,7 @@ class Tomado(object):
         if sender.title == "Pause Long Break":
             self.replace_menu_item(self.pause_long_button, self.continue_long_button)
 
-    #method for continuing the timer
+    # continues the timer
     def continue_timer(self, sender):
         if sender.title.split()[0] == "Continue" and self.prefs.get("allow_sound"):
             #play a sound
@@ -637,7 +638,7 @@ class Tomado(object):
         if sender.title == "Continue Long Break":
             self.replace_menu_item(self.continue_long_button, self.pause_long_button)
 
-    #method for reseting the timer
+    # method for reseting the timer
     def reset_timer(self, sender):
         if self.prefs.get("allow_sound"):
             #play a sound
@@ -647,7 +648,7 @@ class Tomado(object):
         #start the timer
         self.start_timer(sender="")
 
-    #method for skiping the timer
+    # method for skiping the timer
     def skip_timer(self, sender):
         if self.prefs.get("allow_sound"):
             #play a sound
@@ -671,23 +672,24 @@ class Tomado(object):
             if self.prefs.get("autostart_break") == True and self.current_interval_type() == "long":
                 self.start_timer(sender="")
     
-    #debug method for testing
+    # shows info about the app
     def about_info(self, sender):
         rumps.alert("About Tomado", "made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n2022\nGPL-3.0 License")
 
-    #not clickable
+    # not clickable
     def not_clickable(self, sender):
         self.not_clickable_notification()
     
-    ##APP
-    #method to run this app
+    ## APP
+    # runs this app
     def run(self):
         self.app.run()
-    
+    # quits this app
     def quit(self, sender):
         self.end_session(sender=None)
         rumps.quit_application(sender=None)
 
+## RUN
 if __name__ == "__main__":
     app = Tomado()
     app.run()
