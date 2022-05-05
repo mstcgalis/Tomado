@@ -63,15 +63,15 @@ class Tomado(object):
         
         ## APP
         # the quit button is changed to say Quit Tomado and the shortcut key is added
-        self.quit_button = rumps.MenuItem("Quit {}".format(self.config["app_name"]), callback=self.quit, key="q")
+        self.quit_button = rumps.MenuItem("Quit {}".format(self.config.get("app_name")), callback=self.quit, key="q")
         # variable containing the rumps.App class
-        self.app = rumps.App(self.config["app_name"], quit_button=None)
+        self.app = rumps.App(self.config.get("app_name"), quit_button=None)
 
         ## TIMER
         # variable containing the rumps.Timer class, arugments are its callback function (tick) and interval (1 sec)
         self.timer = rumps.Timer(self.tick, 1)
         # creates application_support folder if there isnt one
-        self.folder = rumps.application_support(self.config["app_name"])
+        self.folder = rumps.application_support(self.config.get("app_name"))
         
         ## PREFERENCES
         # settings that can be user defined
@@ -85,7 +85,7 @@ class Tomado(object):
             "allow_sound": True,
             "timer_sound": "sounds/beep.mp3"
         }
-        # path to prefs
+        # path to the preferences file
         self.prefs_path = str(self.folder + "/prefs.json")
         # if it exists, load prefs from the json in prefs_path
         try: 
@@ -96,7 +96,7 @@ class Tomado(object):
             self.prefs = self.default_prefs    
         
         ## STATS
-        # path to the data file
+        # path to the stats file
         self.stats_path = str(self.folder + '/stats.json')
         # if it exists, load stats from the json in stats_path
         with open(self.stats_path, "a") as data:
@@ -113,19 +113,19 @@ class Tomado(object):
         # end session button
         self.end_session_button = rumps.MenuItem("End Session", callback=self.end_session, key="e")
         # about button
-        self.about_button = rumps.MenuItem("About {}".format(self.config["app_name"]), callback=self.about_info)
+        self.about_button = rumps.MenuItem("About {}".format(self.config.get("app_name")), callback=self.about_info)
         
         # preferences button
         self.prefereces_button = rumps.MenuItem("Preferences")
         # pomodoro interval preference
         self.pomodoro_length_button = rumps.MenuItem("Pomodoro Length")
-        self.pomodoro_length_options = self.create_submenu(self.config["pomodoro_length_options"], self.change_length, "pomodoro")
+        self.pomodoro_length_options = self.create_submenu(self.config.get("pomodoro_length_options"), self.change_length, "pomodoro")
         # break length preference
         self.break_length_button = rumps.MenuItem("Short Break Length")
-        self.break_length_options = self.create_submenu(self.config["break_length_options"], self.change_length, "break")
+        self.break_length_options = self.create_submenu(self.config.get("break_length_options"), self.change_length, "break")
         # long break length preference
         self.long_length_button = rumps.MenuItem("Long Break Length")
-        self.long_length_options = self.create_submenu(self.config["long_length_options"], self.change_length, "long")
+        self.long_length_options = self.create_submenu(self.config.get("long_length_options"), self.change_length, "long")
         # autostart pomodoros toggle
         self.autostart_pomodoro_button = rumps.MenuItem("Autostart Pomodoros", callback=self.autostart_toggle)
         self.autostart_pomodoro_button.type = "pomodoro"
@@ -136,7 +136,7 @@ class Tomado(object):
         self.allow_sounds_button = rumps.MenuItem("Allow Sounds", callback=self.sounds_toggle)
         # sound preferences
         self.sound_preferences_button = rumps.MenuItem("Timer Sound")
-        self.sound_options = self.create_submenu(self.config["sound_options"], self.change_sound)
+        self.sound_options = self.create_submenu(self.config.get("sound_options"), self.change_sound)
         
         # stats today submenu
         self.today_stats_submenu = rumps.MenuItem("Today's Stats")
@@ -147,6 +147,7 @@ class Tomado(object):
         self.stats_today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
         self.stats_today_breakes.icon = self.config.get("break_symbol")
 
+        #TODO: this is terrible, refractor buttons changes
         ## POMODORO BUTTONS
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.start_pomodoro_button = rumps.MenuItem("Start Pomodoro", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
@@ -215,20 +216,20 @@ class Tomado(object):
                 self.quit_button]
             }
         
-        ##DEFAULT menu and state
-        #create a session from the session_general at startup
+        ## DEFAULT menu and state
+        # create a session from the session_general at startup
         self.create_session(self.session_general)
-        #set the menu to the default - pomodoro_loaded_menu
+        # set the menu to the default - pomodoro_loaded_menu
         self.app.menu.update(self.menus.get("default_menu"))
-        #load todays stats from data
+        # load todays stats from data
         self.load_today_stats(sender="")
-        #loaded state of timer
+        # loaded state of timer
         self.loaded_state()
-        #show the right interval length in preferences
+        # show the right interval length in preferences
         self.startup_display_length()
-        #show the right state for the autostart buttons
+        # show the right state for the autostart buttons
         self.startup_display_autostart()
-        #show the right state for the sound options
+        # show the right state for the sound options
         self.startup_display_sound()
         self.startup_toggle_sounds()
 
