@@ -4,9 +4,29 @@ import json
 import time
 from playsound import playsound
 
+
 class Tomado(object):
+    ## UTILITIES
+    def create_submenu(self, button_list, type):
+        """Creates a submenu containing rumps.MenuItem objects from a list of strings
+
+        Args:
+            button_list (list of strings): list of button names in submenu
+            type (string): type of interval (pomodoro/break/long)
+
+        Returns:
+            list: list containing rumps.MenuItem objects
+        """
+        submenu = []
+        for n in button_list:
+            button = rumps.MenuItem("{} Minutes".format(n), callback=self.change_length)
+            button.type = type
+            submenu.append(button)
+        return submenu
+
     def __init__(self):
-        ##CONFIG
+        ## CONFIG
+        # settings that cant't be user defined for now
         self.config = {
             "app_name" : "Tomado",
             "pomodoro_message": "Pomodoro is over. Take a break! 🪴",
@@ -18,10 +38,14 @@ class Tomado(object):
             "clock_full": "🍅",
             "pomodoro_symbol" : "icons/pomodoro.png",
             "break_symbol" : "icons/break.png",
-            "long_symbol" : "icons/long.png"
+            "long_symbol" : "icons/long.png",
+            "pomodoro_length_options" : ["15", "20", "25", "30", "40", "45", "60"],
+            "break_length_options" : ["3", "5", "10", "15", "20"],
+            "long_length_options" : ["10", "15", "20", "25", "30"]
         }
-        #SESSION
-        #list representing the order and number and type of intervals in a session
+       
+        ## SESSION
+        # list representing the order and type of intervals in a session
         self.session_general = [
             "pomodoro",
             "break",
@@ -32,21 +56,24 @@ class Tomado(object):
             "pomodoro",
             "long_break",
         ]
-        #dictionary representing the active session made from the session_general
+        # dictionary representing the active session made from the session_general
         self.session = {}
         
-        ##APP, TIMER
-        #the quit button is changed to say Quit Tomado and the shortcut key is added
-        self.quit_button = rumps.MenuItem("Quit Tomado", callback=self.quit, key="q")
-        #variable containing the rumps.App class
-        self.app = rumps.App("Tomado", quit_button=None)
-        #variable containing the rumps.Timer class, arugments are its callback functions and a 1 second interval
+        ## APP
+        # the quit button is changed to say Quit Tomado and the shortcut key is added
+        self.quit_button = rumps.MenuItem("Quit {}".format(self.config["app_name"]), callback=self.quit, key="q")
+        # variable containing the rumps.App class
+        self.app = rumps.App(self.config["app_name"], quit_button=None)
+
+        ## TIMER
+        # variable containing the rumps.Timer class, arugments are its callback function (tick) and interval (1 sec)
         self.timer = rumps.Timer(self.tick, 1)
-        #creates support folder if there isnt one
-        self.folder = rumps.application_support("Tomado")
+        # creates application_support folder if there isnt one
+        self.folder = rumps.application_support(self.config["app_name"])
         
-        ##PREFERENCES
-        #default prefs
+        ## PREFERENCES
+        # settings that can be user defined
+        # default prefs
         self.default_prefs = {
             "pomodoro_length": 1500,
             "break_length": 300,
@@ -56,117 +83,104 @@ class Tomado(object):
             "allow_sound": True,
             "timer_sound": "sounds/beep.mp3"
         }
-        #establishing a path to prefs
-        self.prefs_filename = str(self.folder + "/prefs.json")
-        #loading prefs from the json, if it exists
+        # path to prefs
+        self.prefs_path = str(self.folder + "/prefs.json")
+        # if it exists, load prefs from the json in prefs_path
         try: 
-            with open(self.prefs_filename, "r") as f:
+            with open(self.prefs_path, "r") as f:
                 self.prefs = json.load(f)
-        #loading the default prefs if there is no file
+        # if there is no file, load the default prefs 
         except:
             self.prefs = self.default_prefs    
         
-        ##STATS
-        #save the fle path to the data file
-        self.data_filename = str(self.folder + '/data.json')
-        #open the data file if it exists, create one if it doesnt
-        with open(self.data_filename, "a") as data:
+        ## STATS
+        # path to the data file
+        self.stats_path = str(self.folder + '/stats.json')
+        # if it exists, load stats from the json in stats_path
+        with open(self.stats_path, "a") as data:
             pass
-        #create the variables for stats
+        # create stats variables
         self.pomodoros_today = 0
         self.pomodoro_time_today = 0
         self.breakes_today = 0
         self.breakes_time_today = 0
 
-        ##GENERAL BUTTONS
-        #session menu item is created as a rumps.MenuItem
+        ## GENERAL BUTTONS
+        # non clickable button showing info about current session
         self.session_info = rumps.MenuItem("Session info", callback=self.not_clickable)
-        #end session button
+        # end session button
         self.end_session_button = rumps.MenuItem("End Session", callback=self.end_session, key="e")
-        #about button
-        self.about_button = rumps.MenuItem("About Tomado", callback=self.about_info)
-        #preferences button
+        # about button
+        self.about_button = rumps.MenuItem("About {}".format(self.config["app_name"]), callback=self.about_info)
+        
+        # preferences button
         self.prefereces_button = rumps.MenuItem("Preferences")
-        #pomodoro length setting
+        # pomodoro interval preference
         self.pomodoro_length_button = rumps.MenuItem("Pomodoro Length")
-        pomodoro_length_options = ["15", "20", "25", "30", "40", "45", "60"]
-        self.pomodoro_length_options = []
-        for n in pomodoro_length_options:
-            button = rumps.MenuItem("{} Minutes".format(n), callback=self.change_length)
-            button.type = "pomodoro"
-            self.pomodoro_length_options.append(button)
-        #break length setting
+        self.pomodoro_length_options = self.create_submenu(self.config["pomodoro_length_options"], "pomodoro")
+        # break length preference
         self.break_length_button = rumps.MenuItem("Short Break Length")
-        break_length_options = ["3", "5", "10", "15", "20"]
-        self.break_length_options = []
-        for n in break_length_options:
-            button = rumps.MenuItem("{} Minutes".format(n), callback=self.change_length)
-            button.type = "break"
-            self.break_length_options.append(button)
-        #long break length setting
+        self.break_length_options = self.create_submenu(self.config["break_length_options"], "break")
+        # long break length preference
         self.long_length_button = rumps.MenuItem("Long Break Length")
-        long_length_options = ["10", "15", "20", "25", "30"]
-        self.long_length_options = []
-        for n in long_length_options:
-            button = rumps.MenuItem("{} Minutes".format(n), callback=self.change_length)
-            button.type = "long"
-            self.long_length_options.append(button)
-        #autostart pomodoros
+        self.long_length_options = self.create_submenu(self.config["long_length_options"], "long")
+        # autostart pomodoros toggle
         self.autostart_pomodoro_button = rumps.MenuItem("Autostart Pomodoros", callback=self.autostart_toggle)
         self.autostart_pomodoro_button.type = "pomodoro"
-        #autostart breakes
+        # autostart breakes toggle
         self.autostart_break_button = rumps.MenuItem("Autostart Breakes", callback=self.autostart_toggle)
         self.autostart_break_button.type = "break"
-        #sound options
-        self.sound_options_button = rumps.MenuItem("Timer sound")
+        # sounds toggle
+        self.allow_sounds_button = rumps.MenuItem("Allow Sounds", callback=self.sounds_toggle)
+        # sound preferences
+        self.sound_preferences_button = rumps.MenuItem("Timer Sound")
         sounds = ["Beep", "Birds", "Ding", "Cicadas", "Wood"]
         self.sound_options = []
         for sound in sounds:
             button = rumps.MenuItem(title=sound, callback=self.change_sound)
             self.sound_options.append(button)
-        #today stats submenu
-        self.today_button = rumps.MenuItem("Today")
-        #shows time tracked today
-        self.today_pomodoros = rumps.MenuItem("Pomodoros:", callback=self.not_clickable)
-        self.today_pomodoros.icon = self.config.get("pomodoro_symbol")
-        #shows pomodoros tracked today
-        self.today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
-        self.today_breakes.icon = self.config.get("break_symbol")
-        #toggled sounds
-        self.allow_sounds_button = rumps.MenuItem("Allow Sounds", callback=self.toggle_sounds)
+        
+        # stats today submenu
+        self.today_stats_submenu = rumps.MenuItem("Today's Stats")
+        # shows pomodoros tracked today
+        self.stats_today_pomodoros = rumps.MenuItem("Pomodoros:", callback=self.not_clickable)
+        self.stats_today_pomodoros.icon = self.config.get("pomodoro_symbol")
+        # shows breakes tracked today
+        self.stats_today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
+        self.stats_today_breakes.icon = self.config.get("break_symbol")
 
-        ##POMODORO BUTTONS
-        #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
+        ## POMODORO BUTTONS
+        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.start_pomodoro_button = rumps.MenuItem("Start Pomodoro", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
-        #pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
+        # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
         self.pause_pomodoro_button = rumps.MenuItem("Pause Pomodoro", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
-        #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
+        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.continue_pomodoro_button = rumps.MenuItem("Continue Pomodoro", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
-        #the skip_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
+        # the skip_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
         self.skip_pomodoro_button = rumps.MenuItem("Skip Pomodoro", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
-        #the reset_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
+        # the reset_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
         self.reset_pomodoro_button = rumps.MenuItem("Reset Pomodoro", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
         ##BREAK BUTTONS
-        #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
+        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.start_break_button = rumps.MenuItem("Start Break", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
-        #pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
+        # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
         self.pause_break_button = rumps.MenuItem("Pause Break", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
-        #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
+        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.continue_break_button = rumps.MenuItem("Continue Break", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
-        #the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
+        # the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
         self.skip_break_button = rumps.MenuItem("Skip Break", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
-        #the reset_break button is created as a rumps.MenuItem, callback will be reset_timer method
+        # the reset_break button is created as a rumps.MenuItem, callback will be reset_timer method
         self.reset_break_button = rumps.MenuItem("Reset Break", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
-        ##LONG BUTTONS
-        #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
+        ## LONG BUTTONS
+        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.start_long_button = rumps.MenuItem("Start Long Break", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
-        #pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
+        # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
         self.pause_long_button = rumps.MenuItem("Pause Long Break", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
-        #start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
+        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.continue_long_button = rumps.MenuItem("Continue Long Break", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
-        #the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
+        # the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
         self.skip_long_button = rumps.MenuItem("Skip Long Break", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
 
         ##MENUS
@@ -178,9 +192,9 @@ class Tomado(object):
                 self.session_info,
                 self.end_session_button,
                 None,
-                [self.today_button, 
-                    [self.today_pomodoros,
-                    self.today_breakes]],
+                [self.today_stats_submenu, 
+                    [self.stats_today_pomodoros,
+                    self.stats_today_breakes]],
                 None,
                 [self.prefereces_button, 
                     [[self.pomodoro_length_button, 
@@ -194,7 +208,7 @@ class Tomado(object):
                     self.autostart_break_button,
                     None,
                     self.allow_sounds_button,
-                    [self.sound_options_button, 
+                    [self.sound_preferences_button, 
                         self.sound_options]
                     ]
                 ],
@@ -351,7 +365,7 @@ class Tomado(object):
                 #set its value to 0
                 self.session[interval] = 0
         #open the data disctionary from json
-        with open(self.data_filename) as f:
+        with open(self.stats_path) as f:
             try: data = json.load(f)
             except: data = {}
         #if a key for today has already been created
@@ -362,7 +376,7 @@ class Tomado(object):
             #create a key for today
             data[time.strftime("%Y_%m_%d",time.localtime(time.time()))] = ({time.strftime("%Y_%m_%d_%H:%M:%S",time.localtime(time.time())):self.session.copy()})
         #write the new data dictionary to json
-        with open(self.data_filename, "w") as f:
+        with open(self.stats_path, "w") as f:
             json.dump(data, f, indent=2)
 
         #load todays stats from data
@@ -378,7 +392,7 @@ class Tomado(object):
         self.pomodoro_time_today = 0
         self.breakes_today = 0
         self.breakes_time_today = 0
-        with open(self.data_filename) as f:
+        with open(self.stats_path) as f:
             #try reading and unsearilizing the file
             try:
                 data = json.load(f)
@@ -431,8 +445,8 @@ class Tomado(object):
                 #add its length to the break time counter 
                 self.breakes_time_today += length
         #pass the stats into the approapriate buttons
-        self.today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, self.secs_to_time(self.pomodoro_time_today, format="hours"))
-        self.today_breakes.title = "{} Breakes = {}".format(self.breakes_today, self.secs_to_time(self.breakes_time_today, format="hours"))
+        self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, self.secs_to_time(self.pomodoro_time_today, format="hours"))
+        self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, self.secs_to_time(self.breakes_time_today, format="hours"))
 
 
 
@@ -440,7 +454,7 @@ class Tomado(object):
 
     #save preferences to a file after change
     def save_preferences(self):
-        with open(self.prefs_filename, "w") as f:
+        with open(self.prefs_path, "w") as f:
             json.dump(self.prefs, f)
 
     #autostart method to display correct info on start up
@@ -476,7 +490,7 @@ class Tomado(object):
             self.allow_sounds_button.state = 0
     
     #toggle sounds
-    def toggle_sounds(self, sender):
+    def sounds_toggle(self, sender):
         #change the preferences value to the other bool
         self.prefs["allow_sound"] = not self.prefs["allow_sound"]
         #change the state to the other one
