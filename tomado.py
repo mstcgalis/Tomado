@@ -147,7 +147,7 @@ class Tomado(object):
         self.stats_today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
         self.stats_today_breakes.icon = self.config.get("break_symbol")
 
-        #TODO: this is terrible, refractor buttons changes
+        #TODO: this is terrible, refractor control buttons 
         ## POMODORO BUTTONS
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.start_pomodoro_button = rumps.MenuItem("Start Pomodoro", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
@@ -217,26 +217,19 @@ class Tomado(object):
             }
         
         ## DEFAULT menu and state
-        # create a session from the session_general at startup
+        # create a session from the session_general
         self.create_session(self.session_general)
-        # set the menu to the default - pomodoro_loaded_menu
+        # set the menu to the default
         self.app.menu.update(self.menus.get("default_menu"))
         # load todays stats from data
         self.load_today_stats(sender="")
         # loaded state of timer
         self.loaded_state()
-        # show the right interval length in preferences
-        self.startup_display_length()
-        # show the right state for the autostart buttons
-        self.startup_display_autostart()
-        # show the right state for the sound options
-        self.startup_display_sound()
-        self.startup_toggle_sounds()
 
-    #METHODS
-
-    ##STATES AND MENUS
-
+        # display the right preferences (sound toggle, sound select, autostart toggles)
+        self.startup_display_preferences()
+    
+    ## STATES AND MENUS
     #method for setting the app to the default menu and resetting timer
     def loaded_state(self):
         #create a variable representing whether a new session has been started
@@ -298,7 +291,6 @@ class Tomado(object):
             return '{:02d}:{:02d}'.format(mins, secs)
 
     ##SESSION
-
     ##method for getting the current interval TYPE from session dict
     def current_interval_type(self):
         #loop through the session, getting the interval key and the bool value
@@ -383,7 +375,6 @@ class Tomado(object):
 
     
     ##STATS
-
     #method for loading todays stats from data
     def load_today_stats(self, sender):
         #reset the stats to zero
@@ -447,28 +438,47 @@ class Tomado(object):
         self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, self.secs_to_time(self.pomodoro_time_today, format="hours"))
         self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, self.secs_to_time(self.breakes_time_today, format="hours"))
 
-
-
-    ##PREFERENCES
-
-    #save preferences to a file after change
+    ## PREFERENCES
+    # save preferences to a file after change
     def save_preferences(self):
         with open(self.prefs_path, "w") as f:
             json.dump(self.prefs, f)
 
-    #autostart method to display correct info on start up
-    def startup_display_autostart(self):
-        #if in the loaded proferences, autostart pomodoros is True, set the state of the button to active
+    # method to display correct preferences on start up
+    def startup_display_preferences(self):
+        # AUTOSTART
         if self.prefs.get("autostart_pomodoro"):
             self.autostart_pomodoro_button.state = 1
-        #else it is False, and thus the buttons state is set to inactive
         else:
             self.autostart_pomodoro_button.state = 0
-        #same as above but for autostart_break
         if self.prefs.get("autostart_break"):
             self.autostart_break_button.state = 1
         else:
             self.autostart_break_button.state = 0
+        # INTERVAL LENGHTS
+        # loop through the list of options/buttons
+        for option in self.pomodoro_length_options:
+            # if the first word (number) of the button title is the same as the number in preferences
+            if int(option.title.split()[0]) * 60 == self.prefs.get("pomodoro_length"):
+                # make the button active
+                option.state = 1
+        for option in self.break_length_options:
+            if int(option.title.split()[0]) * 60 == self.prefs.get("break_length"):
+                option.state = 1
+        for option in self.long_length_options:
+            if int(option.title.split()[0]) * 60 == self.prefs.get("long_length"):
+                option.state = 1
+        # SOUND TOGGLE
+        if self.prefs.get("allow_sound"):
+            self.allow_sounds_button.state = 1
+        else:
+            self.allow_sounds_button.state = 0
+        # SOUND SELECT
+        for option in self.sound_options:
+            # if the title of the button is the same as the file in preferences
+            if "sounds/" + option.title.lower() + ".mp3" == self.prefs.get("timer_sound"):
+                # make the button active
+                option.state = 1
     
     #autostart toggle method, activated by the buttons
     def autostart_toggle(self, sender):
@@ -480,39 +490,6 @@ class Tomado(object):
         else:
             sender.state = 0
         self.save_preferences()
-    
-    #autostart method to display correct info on start up
-    def startup_toggle_sounds(self):
-        if self.prefs.get("allow_sound"):
-            self.allow_sounds_button.state = 1
-        else:
-            self.allow_sounds_button.state = 0
-    
-    #toggle sounds
-    def sounds_toggle(self, sender):
-        #change the preferences value to the other bool
-        self.prefs["allow_sound"] = not self.prefs["allow_sound"]
-        #change the state to the other one
-        if sender.state == 0:
-            sender.state = 1
-        else:
-            sender.state = 0
-        self.save_preferences()
-
-    #startup - display the selected interval length from preferences - WORKS
-    def startup_display_length(self):
-        #loop through the list of options/buttons
-        for option in self.pomodoro_length_options:
-            #if the first word (number) of the button title is the same as the number in preferences
-            if int(option.title.split()[0]) * 60 == self.prefs.get("pomodoro_length"):
-                #make the button active
-                option.state = 1
-        for option in self.break_length_options:
-            if int(option.title.split()[0]) * 60 == self.prefs.get("break_length"):
-                option.state = 1
-        for option in self.long_length_options:
-            if int(option.title.split()[0]) * 60 == self.prefs.get("long_length"):
-                option.state = 1
 
     #change the length of an interval
     def change_length(self, sender):
@@ -538,16 +515,8 @@ class Tomado(object):
             self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.current_interval_type())))
         self.save_preferences()
 
-    #load the correct sound from prefs on autostart
-    def startup_display_sound(self):
-    #loop through the list of options/buttons
-        for option in self.sound_options:
-            #if the title of the button is the same as the file in preferences
-            if "sounds/" + option.title.lower() + ".mp3" == self.prefs.get("timer_sound"):
-                #make the button active
-                option.state = 1
-
-    #chnge the timer sound
+    ## SOUNDS
+    # change the timer sound
     def change_sound(self, sender):
         self.prefs["timer_sound"] = "sounds/" + sender.title.lower() + ".mp3"
         sender.state = 1
@@ -556,9 +525,19 @@ class Tomado(object):
                 sound.state = 0
         self.save_preferences()
 
-    ##NOTIFICATIONS
-
-    #pomodoro notification
+    #toggle sounds
+    def sounds_toggle(self, sender):
+        #change the preferences value to the other bool
+        self.prefs["allow_sound"] = not self.prefs["allow_sound"]
+        #change the state to the other one
+        if sender.state == 0:
+            sender.state = 1
+        else:
+            sender.state = 0
+        self.save_preferences()
+    
+    ## NOTIFICATIONS
+    # pomodoro notification
     def pomodoro_notification(self):
         rumps.notification(
                 title=self.config["app_name"],
@@ -568,7 +547,7 @@ class Tomado(object):
         if self.prefs.get("allow_sound"):
             playsound(self.prefs.get("timer_sound"))
     
-    #break notification
+    # break notification
     def break_notification(self):
         rumps.notification(
                 title=self.config["app_name"],
@@ -578,7 +557,7 @@ class Tomado(object):
         if self.prefs.get("allow_sound"):
             playsound(self.prefs.get("timer_sound"))
 
-    #long break notification
+    # long break notification
     def long_notification(self):
         rumps.notification(
                 title=self.config["app_name"],
@@ -588,7 +567,7 @@ class Tomado(object):
         if self.prefs.get("allow_sound"):
             playsound(self.prefs.get("timer_sound"))
 
-    #not clickable notification
+    # not clickable notification
     def not_clickable_notification(self):
         rumps.notification(
                 title=self.config["app_name"],
@@ -596,9 +575,8 @@ class Tomado(object):
                 message=self.config["not_clickable_message"],
                 sound=False)
 
-    ##TIMER
-
-    #method passed in as a callback into rumps.Timer, will happen every second
+    ## TIMER
+    # method passed in as a callback into rumps.Timer, will happen every second
     def tick(self, sender):
         #add one to the counter
         sender.count += 1
@@ -612,7 +590,7 @@ class Tomado(object):
             #stop the timer
             self.stop_timer()
 
-    #method for starting the timer
+    # method for starting the timer
     def start_timer(self, sender):
         #check if the function is being triggered by a button
         try: 
