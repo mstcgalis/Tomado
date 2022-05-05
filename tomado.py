@@ -522,11 +522,11 @@ class Tomado(object):
                 sound.state = 0
         self.save_preferences()
 
-    #toggle sounds
+    # toggle sounds
     def sounds_toggle(self, sender):
-        #change the preferences value to the other bool
+        # change the preferences value to the other bool
         self.prefs["allow_sound"] = not self.prefs["allow_sound"]
-        #change the state to the other one
+        # change the state to the other one
         if sender.state == 0:
             sender.state = 1
         else:
@@ -535,31 +535,11 @@ class Tomado(object):
     
     ## NOTIFICATIONS
     # pomodoro notification
-    def pomodoro_notification(self):
+    def notification(self, type):
         rumps.notification(
                 title=self.config["app_name"],
                 subtitle="",
-                message=self.config["pomodoro_message"],
-                sound=False)
-        if self.prefs.get("allow_sound"):
-            playsound(self.prefs.get("timer_sound"))
-    
-    # break notification
-    def break_notification(self):
-        rumps.notification(
-                title=self.config["app_name"],
-                subtitle="",
-                message=self.config["break_message"],
-                sound=False)
-        if self.prefs.get("allow_sound"):
-            playsound(self.prefs.get("timer_sound"))
-
-    # long break notification
-    def long_notification(self):
-        rumps.notification(
-                title=self.config["app_name"],
-                subtitle="",
-                message=self.config["long_message"],
+                message=self.config["{}_message".format(type)],
                 sound=False)
         if self.prefs.get("allow_sound"):
             playsound(self.prefs.get("timer_sound"))
@@ -615,12 +595,7 @@ class Tomado(object):
         self.timer.stop()
         self.timer.end = 0
         #notify the user according to the current timer type
-        if self.current_interval_type() == "pomodoro":
-            self.pomodoro_notification()
-        if self.current_interval_type() == "break":
-            self.break_notification()
-        if self.current_interval_type() == "long":
-            self.long_notification()
+        self.notification(self.current_interval_type())
         #set the just passed interval to the time it has elapsed
         self.session_current[self.current_interval()] = self.timer.count - 1
         #load the next interval, get info about whether a new session has been started
