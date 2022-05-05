@@ -161,7 +161,7 @@ class Tomado(object):
         # the reset_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
         self.reset_pomodoro_button = rumps.MenuItem("Reset Pomodoro", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
-        ##BREAK BUTTONS
+        ## BREAK BUTTONS
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.start_break_button = rumps.MenuItem("Start Break", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
         # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
@@ -183,7 +183,7 @@ class Tomado(object):
         # the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
         self.skip_long_button = rumps.MenuItem("Skip Long Break", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
 
-        ##MENUS
+        ## MENUS
         self.menus = {"default_menu" : 
                 [self.start_pomodoro_button, 
                 self.reset_pomodoro_button,
