@@ -7,19 +7,20 @@ from playsound import playsound
 
 class Tomado(object):
     ## UTILITIES
-    def create_submenu(self, button_list, type):
+    def create_submenu(self, button_list, callback, type=""):
         """Creates a submenu containing rumps.MenuItem objects from a list of strings
 
         Args:
             button_list (list of strings): list of button names in submenu
             type (string): type of interval (pomodoro/break/long)
+            callback (function/method): callback function that will be triggered by the buttons
 
         Returns:
             list: list containing rumps.MenuItem objects
         """
         submenu = []
         for n in button_list:
-            button = rumps.MenuItem("{} Minutes".format(n), callback=self.change_length)
+            button = rumps.MenuItem("{} Minutes".format(n), callback=callback)
             button.type = type
             submenu.append(button)
         return submenu
@@ -41,7 +42,8 @@ class Tomado(object):
             "long_symbol" : "icons/long.png",
             "pomodoro_length_options" : ["15", "20", "25", "30", "40", "45", "60"],
             "break_length_options" : ["3", "5", "10", "15", "20"],
-            "long_length_options" : ["10", "15", "20", "25", "30"]
+            "long_length_options" : ["10", "15", "20", "25", "30"],
+            "sound_options" : ["Beep", "Birds", "Ding", "Cicadas", "Wood"]
         }
        
         ## SESSION
@@ -117,13 +119,13 @@ class Tomado(object):
         self.prefereces_button = rumps.MenuItem("Preferences")
         # pomodoro interval preference
         self.pomodoro_length_button = rumps.MenuItem("Pomodoro Length")
-        self.pomodoro_length_options = self.create_submenu(self.config["pomodoro_length_options"], "pomodoro")
+        self.pomodoro_length_options = self.create_submenu(self.config["pomodoro_length_options"], self.change_length, "pomodoro")
         # break length preference
         self.break_length_button = rumps.MenuItem("Short Break Length")
-        self.break_length_options = self.create_submenu(self.config["break_length_options"], "break")
+        self.break_length_options = self.create_submenu(self.config["break_length_options"], self.change_length, "break")
         # long break length preference
         self.long_length_button = rumps.MenuItem("Long Break Length")
-        self.long_length_options = self.create_submenu(self.config["long_length_options"], "long")
+        self.long_length_options = self.create_submenu(self.config["long_length_options"], self.change_length, "long")
         # autostart pomodoros toggle
         self.autostart_pomodoro_button = rumps.MenuItem("Autostart Pomodoros", callback=self.autostart_toggle)
         self.autostart_pomodoro_button.type = "pomodoro"
@@ -134,11 +136,7 @@ class Tomado(object):
         self.allow_sounds_button = rumps.MenuItem("Allow Sounds", callback=self.sounds_toggle)
         # sound preferences
         self.sound_preferences_button = rumps.MenuItem("Timer Sound")
-        sounds = ["Beep", "Birds", "Ding", "Cicadas", "Wood"]
-        self.sound_options = []
-        for sound in sounds:
-            button = rumps.MenuItem(title=sound, callback=self.change_sound)
-            self.sound_options.append(button)
+        self.sound_options = self.create_submenu(self.config["sound_options"], self.change_sound)
         
         # stats today submenu
         self.today_stats_submenu = rumps.MenuItem("Today's Stats")
