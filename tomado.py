@@ -156,15 +156,15 @@ class Tomado(object):
 
         ## TIMER BUTTONS
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_button = rumps.MenuItem("Start {}".format(self.current_interval_type(full_text=True)), callback=self.start_timer, key="s", icon="icons/start.png", template=True)
+        self.start_button = rumps.MenuItem("Start {}".format(self.get_current_interval_type(full_text=True)), callback=self.start_timer, key="s", icon="icons/start.png", template=True)
         # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_button = rumps.MenuItem("Pause {}".format(self.current_interval_type(full_text=True)), callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
+        self.pause_button = rumps.MenuItem("Pause {}".format(self.get_current_interval_type(full_text=True)), callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_button = rumps.MenuItem("Continue {}".format(self.current_interval_type(full_text=True)), callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
+        self.continue_button = rumps.MenuItem("Continue {}".format(self.get_current_interval_type(full_text=True)), callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
         # the skip_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.skip_button = rumps.MenuItem("Skip {}".format(self.current_interval_type(full_text=True)), callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
+        self.skip_button = rumps.MenuItem("Skip {}".format(self.get_current_interval_type(full_text=True)), callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
         # the reset_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.reset_button = rumps.MenuItem("Reset {}".format(self.current_interval_type(full_text=True)), callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
+        self.reset_button = rumps.MenuItem("Reset {}".format(self.get_current_interval_type(full_text=True)), callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
         ## MENUS
         self.menus = {"default_menu" : 
@@ -222,26 +222,25 @@ class Tomado(object):
 
         # variable representing whether a new session has been started
         new_session = False
-        #check wheter the session is not over aka there is not a bool value in session
-        if self.current_interval_type() == False:
+        # check wheter the session is not over aka there is not a bool value in session
+        if self.get_current_interval_type() == False:
             #if it is over, trigger a method for ending a session
             self.end_session(sender="loaded")
             #save the info about a new session starting to a variable
             new_session = True
 
-        #change the title to the current interval
-        self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.current_interval_type())))
-        self.app.icon = self.config.get("{}_symbol".format(self.current_interval_type())) 
+        # change the title to the current interval
+        self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
+        self.app.icon = self.config.get("{}_symbol".format(self.get_current_interval_type())) 
 
-        #update the menu buttons
+        # update the menu buttons
         self.update_menu()
-
-        #update the session info
+        # update the session info
         self.update_session_info()
-        #update todays stats
+        # update todays stats
         self.update_today_stats(sender="")
 
-        #return the variable representing info about whether a new session has been started
+        # return variable representing info about whether a new session has been started
         return new_session
     
     # replaces a MenuItem with another MenuItem
@@ -250,15 +249,16 @@ class Tomado(object):
         self.app.menu.pop(original_item.title)
         self.update_menu()
 
-    #method for replacing the whole menu, the new one is from an iterable
+    # updates timer control button titles with correct interval types
     def update_menu(self):
-        self.start_button.title = "Start {}".format(self.current_interval_type(full_text=True))
-        self.pause_button.title = "Pause {}".format(self.current_interval_type(full_text=True))
-        self.continue_button.title = "Continue {}".format(self.current_interval_type(full_text=True))
-        self.skip_button.title = "Skip {}".format(self.current_interval_type(full_text=True))
-        self.reset_button.title = "Reset {}".format(self.current_interval_type(full_text=True))
+        self.start_button.title = "Start {}".format(self.get_current_interval_type(full_text=True))
+        self.pause_button.title = "Pause {}".format(self.get_current_interval_type(full_text=True))
+        self.continue_button.title = "Continue {}".format(self.get_current_interval_type(full_text=True))
+        self.skip_button.title = "Skip {}".format(self.get_current_interval_type(full_text=True))
+        self.reset_button.title = "Reset {}".format(self.get_current_interval_type(full_text=True))
     
-    #method that takes an integer of seconds and returns a minutes:seconds string, or a hours:minutes:seconds string
+    # FIXME: to utilities.py
+    # takes an integer of seconds and returns a minutes:seconds string, or a hours:minutes:seconds string
     def secs_to_time(self, seconds, format = "minutes"):
         if format == "hours":
             hours, secs = divmod(seconds, 3600)
@@ -268,14 +268,14 @@ class Tomado(object):
             mins, secs = divmod(seconds, 60)
             return '{:02d}:{:02d}'.format(mins, secs)
 
-    ##SESSION
-    ##method for getting the current interval TYPE from session dict
-    def current_interval_type(self, full_text=False):
-        #loop through the session, getting the interval key and the bool value
+    ## SESSION
+    # returns the current interval TYPE from current_session dict
+    def get_current_interval_type(self, full_text=False):
+        # loop through the session, getting the interval key and the bool value
         for interval, value in self.session_current.items():
-            #if the bool is False aka the interval has not been completed
+            # if the bool is False aka the interval has not been completed
             if type(value) == bool:
-                #return the first word of interval key (pomodoro/break/long)
+                # return the first word of interval key (pomodoro/break/long)
                 if full_text == True:
                     if interval.split("_")[0] == "long":
                         return "Long Break"
@@ -283,39 +283,38 @@ class Tomado(object):
                         return interval.split("_")[0].capitalize()
                 else:
                     return interval.split("_")[0]
-        #when the loop concludes without returning the function, it means there is no interval left in the session
-        #return False
+        # when the loop concludes without returning the function, it means there is no interval left in the session - return False
         return False
 
-    #method for getting the current SPECIFIC interval from session dict
-    def current_interval(self):
-        #loop through the session, getting the interval key and the bool value
+    # returns current SPECIFIC interval from current_session dict
+    def get_current_interval(self):
+        # loop through the session, getting the interval key and the bool value
         for interval, value in self.session_current.items():
-            #if the bool is False aka the interval has not been completed
+            # if the bool is False aka the interval has not been completed
             if type(value) == bool:
-                #return the first word of interval key (pomodoro/break/long)
+                # return the first word of interval key (pomodoro/break/long)
                 return interval
     
-    #method for updating the session info
+    # updates the session info
     def update_session_info(self):
         string = ""
-        #loop through the items in session
+        # loop through the items in session
         for interval, value in self.session_current.items():
-            #if the item starts with "pomodoro"
+            # if the item starts with "pomodoro"
             if interval.split("_")[0] == "pomodoro":
-                #if the interval is the current interval and there is time in the timer
-                if interval == self.current_interval() and self.timer.is_alive() == True:
-                    #add the half-full clock
+                # if the interval is the current interval and there is time in the timer
+                if interval == self.get_current_interval() and self.timer.is_alive() == True:
+                    # add the half-full clock
                     string += self.config.get("clock_half")
-                #if the interval has a value type bool, aka it has not been started yet
+                # if the interval has a value type bool, aka it has not been started yet
                 elif type(value) == bool:
-                    #add the empty clock
+                    # add the empty clock
                     string += self.config.get("clock_empty")
-                #else the value has alredy been assigned an int aka it has passed already
+                # else the value has alredy been assigned an int aka it has passed already
                 else:
-                    #add the full clock
+                    # add the full clock
                     string += self.config.get("clock_full")
-        #set the title of the session info to the string
+        # set the title of the session info to the string
         self.session_info.title = "Session: {}".format(string)
 
     # creates a new session from self.session_general
@@ -323,43 +322,43 @@ class Tomado(object):
         for c, interval in enumerate(self.session_general):
             self.session_current["{}_{}".format(interval, c)] = False
 
-    # method for ending and saving a session
+    # ends and saves current session
     def end_session(self, sender):
-        #stop the timer
+        # stop the timer
         self.timer.stop()
-        #if the timer hasnt been started
-        if self.timer.count == 0 and self.current_interval() != None:
-            self.session_current[self.current_interval()] = 0
-        elif self.current_interval() != None:
-            #set the just passed interval to the time it has elapsed
-            self.session_current[self.current_interval()] = self.timer.count - 1
-        #loop through the session
+        # if the timer hasnt been started
+        if self.timer.count == 0 and self.get_current_interval() != None:
+            self.session_current[self.get_current_interval()] = 0
+        elif self.get_current_interval() != None:
+            # set the just passed interval to the time it has elapsed
+            self.session_current[self.get_current_interval()] = self.timer.count - 1
+        # loop through the session
         for interval, value in self.session_current.items():
-            #if an interval still hasnt been started
+            # if an interval still hasnt been started
             if type(value) == bool:
                 #set its value to 0
                 self.session_current[interval] = 0
-        #open the data disctionary from json
+        # open the data disctionary from json
         with open(self.stats_path) as f:
             try: data = json.load(f)
             except: data = {}
-        #if a key for today has already been created
+        # if a key for today has already been created
         if time.strftime("%Y_%m_%d",time.localtime(time.time())) in data.keys():
-            #insert the current session as value with key of date and time
+            # insert the current session as value with key of date and time
             data[time.strftime("%Y_%m_%d",time.localtime(time.time()))][time.strftime("%Y_%m_%d_%H:%M:%S",time.localtime(time.time()))] = self.session_current.copy()
         else:
-            #create a key for today
+            # create a key for today
             data[time.strftime("%Y_%m_%d",time.localtime(time.time()))] = ({time.strftime("%Y_%m_%d_%H:%M:%S",time.localtime(time.time())):self.session_current.copy()})
-        #write the new data dictionary to json
+        # write the new data dictionary to json
         with open(self.stats_path, "w") as f:
             json.dump(data, f, indent=2)
 
-        #load todays stats from data
+        # load todays stats from data
         self.load_today_stats(sender="")
 
     
     ## STATS
-    # method for loading todays stats from stats file
+    # loads todays stats from stats file
     def load_today_stats(self, sender):
         # reset the stats to zero
         self.pomodoros_today = 0
@@ -367,58 +366,58 @@ class Tomado(object):
         self.breakes_today = 0
         self.breakes_time_today = 0
         with open(self.stats_path) as f:
-            #try reading and unsearilizing the file
+            # try reading and unsearilizing the file
             try:
                 data = json.load(f)
-            #if it is empty, return this function
+            # if it is empty, return this function
             except json.decoder.JSONDecodeError: return
+        # try reading today data from the saved_sessions
         try:
-        #try reading today data from the saved_sessions
-            #from the data dict, get todays dict of sessions using todays date in the Y_M_D (2022_1_13) format as the key
+            # from the data dict, get todays dict of sessions using todays date in the Y_M_D (2022_1_13) format as the key
             today = data[time.strftime("%Y_%m_%d",time.localtime(time.time()))]
-            #loop through todays sessions without their epoch time keys
+            # loop through todays sessions without their epoch time keys
             for session in today.values():
-                #in each session, loop thourgh the intervals and length they elapsed
+                # in each session, loop thourgh the intervals and length they elapsed
                 for interval, length in session.items():
-                    #if its a pomodoro interval
+                    # if its a pomodoro interval
                     if interval.split("_")[0] == "pomodoro" and length > 0:
-                        #add one to the pomodoro counter
+                        # add one to the pomodoro counter
                         self.pomodoros_today += 1
-                        #add its length to the pomodoro time counter
+                        # add its length to the pomodoro time counter
                         self.pomodoro_time_today += length
-                    #else it is a break or long break and if it hasnt been skipped completety
+                    # else it is a break or long break and if it hasnt been skipped completety
                     elif length > 0:
-                        #add one to the break counter
+                        # add one to the break counter
                         self.breakes_today += 1
-                        #add its length to the break time counter
+                        # add its length to the break time counter
                         self.breakes_time_today += length    
-        #except todays stats havent been created
+        # except todays stats havent been created
         except KeyError: pass
-
-        #clear the old session
+        # clear the old session
         self.session_current.clear()
-        #create a new session
+        # create a new session
         self.create_session()
         if sender != "loaded":
-            #load the next interval into the timer
+            # load the next interval into the timer
             self.loaded_state()
 
+    # updates today's stats
     def update_today_stats(self, sender):
-        #add stats from the current session
+        # add stats from the current session
         for interval, length in self.session_current.items():
-        #if its a pomodoro interval and it has already elapsed some time
+        # if its a pomodoro interval and it has already elapsed some time
             if interval.split("_")[0] == "pomodoro" and type(length) != bool:
-                #add one to the pomodoro counter
+                # add one to the pomodoro counter
                 self.pomodoros_today += 1
-                #add its length to the pomodoro time counter
+                # add its length to the pomodoro time counter
                 self.pomodoro_time_today += length
-            #else it is a break or long break and it has already elapsed some time
+            # else it is a break or long break and it has already elapsed some time
             elif type(length) != bool:
-                #add one to the break counter
+                # add one to the break counter
                 self.breakes_today += 1
-                #add its length to the break time counter 
+                # add its length to the break time counter 
                 self.breakes_time_today += length
-        #pass the stats into the approapriate buttons
+        # pass the stats into the approapriate buttons
         self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, self.secs_to_time(self.pomodoro_time_today, format="hours"))
         self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, self.secs_to_time(self.breakes_time_today, format="hours"))
 
@@ -493,7 +492,7 @@ class Tomado(object):
         # if there isnt an active interval
         if self.timer.count == 0:
             #set the menu bar timer text to the new length
-            self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.current_interval_type())))
+            self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
         self.save_preferences()
 
     ## SOUNDS
@@ -539,61 +538,61 @@ class Tomado(object):
     ## TIMER
     # triggered every second
     def tick(self, sender):
-        #add one to the counter
+        # add one to the counter
         sender.count += 1
-        #calculate the remaining time from the counter and the end
+        # calculate the remaining time from the counter and the end
         time_left = sender.end - sender.count
-        #the menu bar title gets changed to the remaining time coverted by a function
+        # the menu bar title gets changed to the remaining time coverted by a function
         self.app.title = self.secs_to_time(time_left+1)
-        self.app.icon = self.config.get("{}_symbol".format(self.current_interval_type()))
-        #if there is no remaining time
+        self.app.icon = self.config.get("{}_symbol".format(self.get_current_interval_type()))
+        # if there is no remaining time
         if time_left < 0:
-            #stop the timer
+            # stop the timer
             self.stop_timer()
 
     # starts the timer
     def start_timer(self, sender):
-        #check if the function is being triggered by a button
+        # check if the function is being triggered by a button
         try: 
             if sender.title.split()[0] == "Start" and self.prefs.get("allow_sound"):
-            #if yes, play a sound
+            # if yes, play a sound
                 playsound("sounds/button.mp3", False)
         except: pass
-        #define the timer length from preferences
-        self.timer.end = self.prefs.get("{}_length".format(self.current_interval_type()))
-        #start the timer
+        # define the timer length from preferences
+        self.timer.end = self.prefs.get("{}_length".format(self.get_current_interval_type()))
+        # start the timer
         self.timer.start()
-        #replace the start button to the pause button
+        # replace the start button to the pause button
         self.swap_menu_item(self.start_button, self.pause_button)
-        #update the session info
+        # update the session info
         self.update_session_info()
     
     # stops the timer
     def stop_timer(self):
-        #stop the timer
+        # stop the timer
         self.timer.stop()
         self.timer.end = 0
-        #notify the user according to the current timer type
-        self.notification(self.current_interval_type())
-        #set the just passed interval to the time it has elapsed
-        self.session_current[self.current_interval()] = self.timer.count - 1
-        #load the next interval, get info about whether a new session has been started
+        # notify the user according to the current timer type
+        self.notification(self.get_current_interval_type())
+        # set the just passed interval to the time it has elapsed
+        self.session_current[self.get_current_interval()] = self.timer.count - 1
+        # load the next interval, get info about whether a new session has been started
         new_session = self.loaded_state()
-        #autostart if a new session hasnt been started
+        # autostart if a new session hasnt been started
         if not new_session:
-            if self.prefs.get("autostart_pomodoro") == True and self.current_interval_type() == "pomodoro":
+            if self.prefs.get("autostart_pomodoro") == True and self.get_current_interval_type() == "pomodoro":
                 self.start_timer(sender="")
-            if self.prefs.get("autostart_break") == True and self.current_interval_type() == "break":
+            if self.prefs.get("autostart_break") == True and self.get_current_interval_type() == "break":
                 self.start_timer(sender="")
-            if self.prefs.get("autostart_break") == True and self.current_interval_type() == "long":
+            if self.prefs.get("autostart_break") == True and self.get_current_interval_type() == "long":
                 self.start_timer(sender="")
 
 
     # pauses the interval
     def pause_timer(self, sender):
-        #stop the timer
+        # stop the timer
         self.timer.stop()
-        #swap the pause_button for the continue button
+        # swap the pause_button for the continue button
         self.swap_menu_item(self.pause_button, self.continue_button)
 
     # continues the interval
@@ -608,29 +607,29 @@ class Tomado(object):
     # resets the interval
     def reset_timer(self, sender):
         if self.prefs.get("allow_sound"):
-            #play a sound
+            # play a sound
             playsound("sounds/button.mp3")
-        #load the next interval
+        # load the next interval
         self.loaded_state()
-        #start the timer
+        # start the timer
         self.start_timer(sender="")
 
     # skipis the interval
     def skip_timer(self, sender):
         if self.prefs.get("allow_sound"):
-            #play a sound
+            # play a sound
             playsound("sounds/button.mp3")
-        #if the timer has not started yet
+        # if the timer has not started yet
         if self.timer.count == 0:
-            self.session_current[self.current_interval()] = 0
+            self.session_current[self.get_current_interval()] = 0
         else:
-            #set the just passed interval to the time it has elapsed
-            self.session_current[self.current_interval()] = self.timer.count - 1
+            # set the just passed interval to the time it has elapsed
+            self.session_current[self.get_current_interval()] = self.timer.count - 1
         try: print("\ntest:", self.saved_sessions[time.strftime("%Y_%m_%d",time.localtime(time.time()))])
         except: pass
-        #load the next interval and get info whether a new session has been started
+        # load the next interval and get info whether a new session has been started
         new_session = self.loaded_state()
-        #autostart if a new session hasnt been started
+        # autostart if a new session hasnt been started
         if not new_session:
             self.start_timer(sender="")
     
