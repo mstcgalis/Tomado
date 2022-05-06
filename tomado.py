@@ -4,6 +4,10 @@ import json
 import time
 from playsound import playsound
 
+## HEADER
+# FIXME: make a utility function for playing a button sound, it it inconsitent
+# FIXME: rework stats system
+
 
 class Tomado(object):
     ## UTILITIES
@@ -147,46 +151,26 @@ class Tomado(object):
         self.stats_today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
         self.stats_today_breakes.icon = self.config.get("break_symbol")
 
-        #TODO: this is terrible, refractor control buttons 
-        ## POMODORO BUTTONS
+        # create a session from the session_general
+        self.create_session()
+
+        ## TIMER BUTTONS
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_pomodoro_button = rumps.MenuItem("Start Pomodoro", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
+        self.start_button = rumps.MenuItem("Start {}".format(self.current_interval_type(full_text=True)), callback=self.start_timer, key="s", icon="icons/start.png", template=True)
         # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_pomodoro_button = rumps.MenuItem("Pause Pomodoro", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
+        self.pause_button = rumps.MenuItem("Pause {}".format(self.current_interval_type(full_text=True)), callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_pomodoro_button = rumps.MenuItem("Continue Pomodoro", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
+        self.continue_button = rumps.MenuItem("Continue {}".format(self.current_interval_type(full_text=True)), callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
         # the skip_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.skip_pomodoro_button = rumps.MenuItem("Skip Pomodoro", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
+        self.skip_button = rumps.MenuItem("Skip {}".format(self.current_interval_type(full_text=True)), callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
         # the reset_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.reset_pomodoro_button = rumps.MenuItem("Reset Pomodoro", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
-
-        ## BREAK BUTTONS
-        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_break_button = rumps.MenuItem("Start Break", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
-        # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_break_button = rumps.MenuItem("Pause Break", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
-        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_break_button = rumps.MenuItem("Continue Break", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
-        # the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.skip_break_button = rumps.MenuItem("Skip Break", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
-        # the reset_break button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.reset_break_button = rumps.MenuItem("Reset Break", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
-
-        ## LONG BUTTONS
-        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_long_button = rumps.MenuItem("Start Long Break", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
-        # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_long_button = rumps.MenuItem("Pause Long Break", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
-        # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_long_button = rumps.MenuItem("Continue Long Break", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
-        # the skip_break button is created as a rumps.MenuItem, callback will be reset_timer method
-        self.skip_long_button = rumps.MenuItem("Skip Long Break", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
+        self.reset_button = rumps.MenuItem("Reset {}".format(self.current_interval_type(full_text=True)), callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
         ## MENUS
         self.menus = {"default_menu" : 
-                [self.start_pomodoro_button, 
-                self.reset_pomodoro_button,
-                self.skip_pomodoro_button, 
+                [self.start_button, 
+                self.reset_button,
+                self.skip_button, 
                 None, 
                 self.session_info,
                 self.end_session_button,
@@ -217,8 +201,6 @@ class Tomado(object):
             }
         
         ## DEFAULT menu and state
-        # create a session from the session_general
-        self.create_session()
         # set the menu to the default
         self.app.menu.update(self.menus.get("default_menu"))
         # load todays stats from data
@@ -230,55 +212,51 @@ class Tomado(object):
         self.startup_display_preferences()
     
     ## STATES AND MENUS
-    #method for setting the app to the default menu and resetting timer
+    # sets the app to the default menu and resets timer
     def loaded_state(self):
-        #create a variable representing whether a new session has been started
-        new_session = False
+
         #stop the current timer
         self.timer.stop()
         #reset the current timer
         self.timer.count = 0
+
+        # variable representing whether a new session has been started
+        new_session = False
         #check wheter the session is not over aka there is not a bool value in session
         if self.current_interval_type() == False:
             #if it is over, trigger a method for ending a session
             self.end_session(sender="loaded")
             #save the info about a new session starting to a variable
             new_session = True
-            #upate stats from json
+
         #change the title to the current interval
         self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.current_interval_type())))
         self.app.icon = self.config.get("{}_symbol".format(self.current_interval_type())) 
-        #update the mene buttons
+
+        #update the menu buttons
         self.update_menu()
+
         #update the session info
         self.update_session_info()
         #update todays stats
         self.update_today_stats(sender="")
+
         #return the variable representing info about whether a new session has been started
         return new_session
     
-    #method for replacing a MenuItem with another MenuItem
-    def replace_menu_item(self, original_item, new_item):
+    # replaces a MenuItem with another MenuItem
+    def swap_menu_item(self, original_item, new_item):
         self.app.menu.insert_after(original_item.title, new_item)
         self.app.menu.pop(original_item.title)
+        self.update_menu()
 
     #method for replacing the whole menu, the new one is from an iterable
     def update_menu(self):
-        self.app.menu.pop(self.app.menu.keys()[0])
-        self.app.menu.pop(self.app.menu.keys()[0])
-        self.app.menu.pop(self.app.menu.keys()[0])
-        if self.current_interval_type() == "pomodoro":
-            self.app.menu.insert_before(self.app.menu.keys()[0], self.start_pomodoro_button)
-            self.app.menu.insert_before(self.app.menu.keys()[1], self.reset_pomodoro_button)
-            self.app.menu.insert_before(self.app.menu.keys()[2], self.skip_pomodoro_button)
-        if self.current_interval_type() == "break":
-            self.app.menu.insert_before(self.app.menu.keys()[0], self.start_break_button)
-            self.app.menu.insert_before(self.app.menu.keys()[1], self.reset_break_button)
-            self.app.menu.insert_before(self.app.menu.keys()[2], self.skip_break_button)
-        if self.current_interval_type() == "long":
-            self.app.menu.insert_before(self.app.menu.keys()[0], self.start_long_button)
-            self.app.menu.insert_before(self.app.menu.keys()[1], self.reset_break_button)
-            self.app.menu.insert_before(self.app.menu.keys()[2], self.skip_long_button)
+        self.start_button.title = "Start {}".format(self.current_interval_type(full_text=True))
+        self.pause_button.title = "Pause {}".format(self.current_interval_type(full_text=True))
+        self.continue_button.title = "Continue {}".format(self.current_interval_type(full_text=True))
+        self.skip_button.title = "Skip {}".format(self.current_interval_type(full_text=True))
+        self.reset_button.title = "Reset {}".format(self.current_interval_type(full_text=True))
     
     #method that takes an integer of seconds and returns a minutes:seconds string, or a hours:minutes:seconds string
     def secs_to_time(self, seconds, format = "minutes"):
@@ -292,13 +270,19 @@ class Tomado(object):
 
     ##SESSION
     ##method for getting the current interval TYPE from session dict
-    def current_interval_type(self):
+    def current_interval_type(self, full_text=False):
         #loop through the session, getting the interval key and the bool value
         for interval, value in self.session_current.items():
             #if the bool is False aka the interval has not been completed
             if type(value) == bool:
                 #return the first word of interval key (pomodoro/break/long)
-                return interval.split("_")[0]
+                if full_text == True:
+                    if interval.split("_")[0] == "long":
+                        return "Long Break"
+                    else:
+                        return interval.split("_")[0].capitalize()
+                else:
+                    return interval.split("_")[0]
         #when the loop concludes without returning the function, it means there is no interval left in the session
         #return False
         return False
@@ -460,7 +444,6 @@ class Tomado(object):
         option_lists = [self.pomodoro_length_options, self.break_length_options, self.long_length_options]
         for options in option_lists:
             for option in options:
-                print(option)
                 # if the first word (number) of the button title is the same as the number in preferences
                 if int(option.title.split()[0]) * 60 == self.prefs.get("{}_length".format(option.type)):
                     # make the button active
@@ -581,12 +564,7 @@ class Tomado(object):
         #start the timer
         self.timer.start()
         #replace the start button to the pause button
-        if self.current_interval_type() == "pomodoro":
-            self.replace_menu_item(self.start_pomodoro_button, self.pause_pomodoro_button)
-        if self.current_interval_type() == "break":
-            self.replace_menu_item(self.start_break_button, self.pause_break_button)
-        if self.current_interval_type() == "long":
-            self.replace_menu_item(self.start_long_button, self.pause_long_button)
+        self.swap_menu_item(self.start_button, self.pause_button)
         #update the session info
         self.update_session_info()
     
@@ -611,34 +589,23 @@ class Tomado(object):
                 self.start_timer(sender="")
 
 
-    # pauses the timer
+    # pauses the interval
     def pause_timer(self, sender):
         #stop the timer
         self.timer.stop()
         #swap the pause_button for the continue button
-        if sender.title == "Pause Pomodoro":
-            self.replace_menu_item(self.pause_pomodoro_button, self.continue_pomodoro_button)
-        if sender.title == "Pause Break":
-            self.replace_menu_item(self.pause_break_button, self.continue_break_button)
-        if sender.title == "Pause Long Break":
-            self.replace_menu_item(self.pause_long_button, self.continue_long_button)
+        self.swap_menu_item(self.pause_button, self.continue_button)
 
-    # continues the timer
+    # continues the interval
     def continue_timer(self, sender):
         if sender.title.split()[0] == "Continue" and self.prefs.get("allow_sound"):
-            #play a sound
             playsound("sounds/button.mp3", False)
-        #start the timer
+        # starts the timer
         self.timer.start()
-        #replace the continue button woth the pause button
-        if sender.title == "Continue Pomodoro":
-            self.replace_menu_item(self.continue_pomodoro_button, self.pause_pomodoro_button)
-        if sender.title == "Continue Break":
-            self.replace_menu_item(self.continue_break_button, self.pause_break_button)
-        if sender.title == "Continue Long Break":
-            self.replace_menu_item(self.continue_long_button, self.pause_long_button)
-
-    # method for reseting the timer
+        # replaces the continue button with the pause button
+        self.swap_menu_item(self.continue_button, self.pause_button)
+    
+    # resets the interval
     def reset_timer(self, sender):
         if self.prefs.get("allow_sound"):
             #play a sound
@@ -648,7 +615,7 @@ class Tomado(object):
         #start the timer
         self.start_timer(sender="")
 
-    # method for skiping the timer
+    # skipis the interval
     def skip_timer(self, sender):
         if self.prefs.get("allow_sound"):
             #play a sound
@@ -665,12 +632,7 @@ class Tomado(object):
         new_session = self.loaded_state()
         #autostart if a new session hasnt been started
         if not new_session:
-            if self.prefs.get("autostart_pomodoro") == True and self.current_interval_type() == "pomodoro":
-                self.start_timer(sender="")
-            if self.prefs.get("autostart_break") == True and self.current_interval_type() == "break":
-                self.start_timer(sender="")
-            if self.prefs.get("autostart_break") == True and self.current_interval_type() == "long":
-                self.start_timer(sender="")
+            self.start_timer(sender="")
     
     # shows info about the app
     def about_info(self, sender):
