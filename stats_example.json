@@ -1,0 +1,24 @@
+{
+    "2022_19 (YYYY_WW)": {
+      "09.05._09:32-09.05._16:10 (DD.MM._HH:MM-endtime) - start time, end time appended when it ends": {
+        "pomodoro_0_09.5._9:57 (interval_n_DD.MM._HH:MM) - end time": 25,
+        "break_1": 5,
+        "pomodoro_2": 25,
+        "break_3": 5,
+        "pomodoro_4": 25,
+        "break_5": 5,
+        "pomodoro_6": 25,
+        "long_break_7": 10
+      },
+      "10.05._9:32": {
+        "pomodoro_0": 25,
+        "break_1": 5,
+        "pomodoro_2": 25,
+        "break_3": 5,
+        "pomodoro_4": 25,
+        "break_5": 5,
+        "pomodoro_6": 25,
+        "long_break_7": 10
+      }
+    }
+}
