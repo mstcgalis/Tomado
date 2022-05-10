@@ -1,13 +1,12 @@
+## HEADER
+# FIXME: rework stats system
+
 from subprocess import call
 import rumps
 import json
 import time
 
 from utilities import *
-
-## HEADER
-# FIXME: make a utility function for playing a button sound, it it inconsitent
-# FIXME: rework stats system
 
 
 class Tomado(object):
@@ -37,7 +36,7 @@ class Tomado(object):
             "app_name" : "Tomado",
             "pomodoro_message": "Pomodoro is over. Take a break! 🪴",
             "break_message": "Break has concluded. Time to focus! 🍅",
-            "long_message": "Session is finished. Good joob! 🌻",
+            "long_message": "Session is finished. Good job! 🌻",
             "not_clickable_message": "This button is not clickable yet, sorry 🌸",
             "clock_empty": "◯ ",
             "clock_half": "⏳",
@@ -208,7 +207,6 @@ class Tomado(object):
         self.load_today_stats(sender="")
         # loaded state of timer
         self.loaded_state()
-
         # display the right preferences (sound toggle, sound select, autostart toggles)
         self.startup_display_preferences()
     
