@@ -209,6 +209,9 @@ class Tomado(object):
         self.loaded_state()
         # display the right preferences (sound toggle, sound select, autostart toggles)
         self.startup_display_preferences()
+
+        #FIXME TESTING
+        self.save_interval("pomdoro", 10)
     
     ## STATES AND MENUS
     # sets the app to the default menu and resets timer
@@ -357,26 +360,38 @@ class Tomado(object):
     ## STATS
 
     #TODO saves interval to current (not ended) session
-    def save_interval(interval):
-        # if the interval has 0 length
-
-            #pass
+    def save_interval(self, save_interval, save_length):
+        if length == 0:
+            return False
 
         # open up stats json into data
+        with open(self.stats_path) as f:
+            try: data = json.load(f)
+            except: data = {}
         
-        # loop through session to find a not finished one
+        current_week = time.strftime("%Y_%W", time.localtime(time.time()))
+        current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
+        current_time = time.strftime("%H:%M%:S%", time.localtime(time.time()))
 
-            # if there is one
-
-                # save it to the session
-
-
-            # else
-
-                # create a new session and save the interval into it
+        for week, sessions in data:
+            if week == current_week:
+                for session, intervals in sessions:
+                    if "-" not in session: # session has not ended yet
+                        intervals["{}_{}".format(save_interval, current_time)] = save_length
+                    else: # there is not current session
+                        sessions["{}_{}".format(current_date, current_time)] = {"{}_{}".format(save_interval, current_time) : save_length}
+                        new_session = True
+            else:
+            create current_week
+            create new_session
+            new_session = True
+            save the interval to new_session
         
         # save the updated stats to the json
-        pass 
+        with open(self.stats_path, "w") as f:
+            json.dump(data, f, indent=2)
+        
+        return new_session #if a new session has been created
 
     # loads todays stats from stats file
     def load_today_stats(self, sender):
