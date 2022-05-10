@@ -597,7 +597,7 @@ class Tomado(object):
         # start the timer
         self.start_timer(sender="")
 
-    # skipis the interval
+    # skips the interval
     def skip_timer(self, sender):
         button_sound(self.prefs.get("allow_sound"))
         # if the timer has not started yet
