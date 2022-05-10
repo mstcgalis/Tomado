@@ -19,6 +19,11 @@ def secs_to_time(seconds, hours=False):
         return '{:02d}:{:02d}'.format(mins, secs)
 
 def button_sound(allow_sound):
+    """Plays a button-pressed feedback sound
+
+    Args:
+        allow_sound (bool): if true, plays the feedback sound
+    """
     if allow_sound:
         playsound("sounds/button.mp3")
     else:
