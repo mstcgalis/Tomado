@@ -4,6 +4,8 @@ import json
 import time
 from playsound import playsound
 
+from utilities import *
+
 ## HEADER
 # FIXME: make a utility function for playing a button sound, it it inconsitent
 # FIXME: rework stats system
@@ -230,7 +232,7 @@ class Tomado(object):
             new_session = True
 
         # change the title to the current interval
-        self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
+        self.app.title = secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
         self.app.icon = self.config.get("{}_symbol".format(self.get_current_interval_type())) 
 
         # update the menu buttons
@@ -256,17 +258,6 @@ class Tomado(object):
         self.continue_button.title = "Continue {}".format(self.get_current_interval_type(full_text=True))
         self.skip_button.title = "Skip {}".format(self.get_current_interval_type(full_text=True))
         self.reset_button.title = "Reset {}".format(self.get_current_interval_type(full_text=True))
-    
-    # FIXME: to utilities.py
-    # takes an integer of seconds and returns a minutes:seconds string, or a hours:minutes:seconds string
-    def secs_to_time(self, seconds, format = "minutes"):
-        if format == "hours":
-            hours, secs = divmod(seconds, 3600)
-            mins, secs = divmod(secs, 60)
-            return '{}h {:02d}m'.format(hours, mins)
-        else:
-            mins, secs = divmod(seconds, 60)
-            return '{:02d}:{:02d}'.format(mins, secs)
 
     ## SESSION
     # returns the current interval TYPE from current_session dict
@@ -418,8 +409,8 @@ class Tomado(object):
                 # add its length to the break time counter 
                 self.breakes_time_today += length
         # pass the stats into the approapriate buttons
-        self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, self.secs_to_time(self.pomodoro_time_today, format="hours"))
-        self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, self.secs_to_time(self.breakes_time_today, format="hours"))
+        self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, secs_to_time(self.pomodoro_time_today, hours=True))
+        self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, secs_to_time(self.breakes_time_today, hours=True))
 
     ## PREFERENCES
     # save preferences to a file after change
@@ -492,7 +483,7 @@ class Tomado(object):
         # if there isnt an active interval
         if self.timer.count == 0:
             #set the menu bar timer text to the new length
-            self.app.title = self.secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
+            self.app.title = secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
         self.save_preferences()
 
     ## SOUNDS
@@ -543,7 +534,7 @@ class Tomado(object):
         # calculate the remaining time from the counter and the end
         time_left = sender.end - sender.count
         # the menu bar title gets changed to the remaining time coverted by a function
-        self.app.title = self.secs_to_time(time_left+1)
+        self.app.title = secs_to_time(time_left+1)
         self.app.icon = self.config.get("{}_symbol".format(self.get_current_interval_type()))
         # if there is no remaining time
         if time_left < 0:
@@ -556,7 +547,7 @@ class Tomado(object):
         try: 
             if sender.title.split()[0] == "Start" and self.prefs.get("allow_sound"):
             # if yes, play a sound
-                playsound("sounds/button.mp3", False)
+                button_sound()
         except: pass
         # define the timer length from preferences
         self.timer.end = self.prefs.get("{}_length".format(self.get_current_interval_type()))
@@ -598,7 +589,7 @@ class Tomado(object):
     # continues the interval
     def continue_timer(self, sender):
         if sender.title.split()[0] == "Continue" and self.prefs.get("allow_sound"):
-            playsound("sounds/button.mp3", False)
+            button_sound()
         # starts the timer
         self.timer.start()
         # replaces the continue button with the pause button
@@ -607,8 +598,7 @@ class Tomado(object):
     # resets the interval
     def reset_timer(self, sender):
         if self.prefs.get("allow_sound"):
-            # play a sound
-            playsound("sounds/button.mp3")
+            button_sound()
         # load the next interval
         self.loaded_state()
         # start the timer
@@ -617,8 +607,7 @@ class Tomado(object):
     # skipis the interval
     def skip_timer(self, sender):
         if self.prefs.get("allow_sound"):
-            # play a sound
-            playsound("sounds/button.mp3")
+            button_sound()
         # if the timer has not started yet
         if self.timer.count == 0:
             self.session_current[self.get_current_interval()] = 0
