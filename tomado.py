@@ -162,9 +162,9 @@ class Tomado(object):
         self.pause_button = rumps.MenuItem("Pause {}".format(self.get_current_interval_type(full_text=True)), callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.continue_button = rumps.MenuItem("Continue {}".format(self.get_current_interval_type(full_text=True)), callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
-        # the skip_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
+        # the skip_pomodoro button is created as a rumps.MenuItem, callback is the skip_timer method
         self.skip_button = rumps.MenuItem("Skip {}".format(self.get_current_interval_type(full_text=True)), callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
-        # the reset_pomodoro button is created as a rumps.MenuItem, callback will be reset_timer method
+        # the reset_pomodoro button is created as a rumps.MenuItem, callback is the reset_timer method
         self.reset_button = rumps.MenuItem("Reset {}".format(self.get_current_interval_type(full_text=True)), callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
         ## MENUS
@@ -540,7 +540,7 @@ class Tomado(object):
             # stop the timer
             self.stop_timer()
 
-    # starts the timer
+    # starts the timer (also button triggered)
     def start_timer(self, sender):
         # check if the function is being triggered by a button
         if type(sender) == rumps.rumps.MenuItem:
@@ -577,6 +577,7 @@ class Tomado(object):
 
     # pauses the interval
     def pause_timer(self, sender):
+        button_sound(self.prefs.get("allow_sound"))
         # stop the timer
         self.timer.stop()
         # swap the pause_button for the continue button
