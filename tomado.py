@@ -320,23 +320,33 @@ class Tomado(object):
         elif self.get_current_interval() != None:
             # set the just passed interval to the time it has elapsed
             self.session_current[self.get_current_interval()] = self.timer.count - 1
+            #TODO: save interval
+
         # loop through the session
         for interval, value in self.session_current.items():
             # if an interval still hasnt been started
             if type(value) == bool:
                 #set its value to 0
                 self.session_current[interval] = 0
+                #TODO dont save 0 length intervals
+
         # open the data disctionary from json
         with open(self.stats_path) as f:
             try: data = json.load(f)
             except: data = {}
+
+        #TODO today -> this week
         # if a key for today has already been created
         if time.strftime("%Y_%m_%d",time.localtime(time.time())) in data.keys():
             # insert the current session as value with key of date and time
             data[time.strftime("%Y_%m_%d",time.localtime(time.time()))][time.strftime("%Y_%m_%d_%H:%M:%S",time.localtime(time.time()))] = self.session_current.copy()
+        #TODO today -> this week
         else:
             # create a key for today
             data[time.strftime("%Y_%m_%d",time.localtime(time.time()))] = ({time.strftime("%Y_%m_%d_%H:%M:%S",time.localtime(time.time())):self.session_current.copy()})
+        #TODO add end time to session
+        #TODO create new session with start time OR do this with first interval started
+        
         # write the new data dictionary to json
         with open(self.stats_path, "w") as f:
             json.dump(data, f, indent=2)
@@ -405,7 +415,7 @@ class Tomado(object):
                 self.breakes_today += 1
                 # add its length to the break time counter 
                 self.breakes_time_today += length
-        # pass the stats into the approapriate buttons
+        # pass the stats into the appropriate buttons
         self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, secs_to_time(self.pomodoro_time_today, hours=True))
         self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, secs_to_time(self.breakes_time_today, hours=True))
 
@@ -559,10 +569,15 @@ class Tomado(object):
         self.timer.end = 0
         # notify the user according to the current timer type
         self.notification(self.get_current_interval_type())
+
         # set the just passed interval to the time it has elapsed
         self.session_current[self.get_current_interval()] = self.timer.count - 1
+
+        #TODO: save interval into stats file, into a session without end time
+
         # load the next interval, get info about whether a new session has been started
         new_session = self.loaded_state()
+        
         # autostart if a new session hasnt been started
         if not new_session:
             if self.prefs.get("autostart_pomodoro") == True and self.get_current_interval_type() == "pomodoro":
