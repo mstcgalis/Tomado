@@ -330,7 +330,7 @@ class Tomado(object):
                 self.session_current[interval] = 0
                 #TODO dont save 0 length intervals
 
-        # open the data disctionary from json
+        # open the data dictionary from json
         with open(self.stats_path) as f:
             try: data = json.load(f)
             except: data = {}
@@ -345,7 +345,6 @@ class Tomado(object):
             # create a key for today
             data[time.strftime("%Y_%m_%d",time.localtime(time.time()))] = ({time.strftime("%Y_%m_%d_%H:%M:%S",time.localtime(time.time())):self.session_current.copy()})
         #TODO add end time to session
-        #TODO create new session with start time OR do this with first interval started
         
         # write the new data dictionary to json
         with open(self.stats_path, "w") as f:
@@ -356,6 +355,29 @@ class Tomado(object):
 
     
     ## STATS
+
+    #TODO saves interval to current (not ended) session
+    def save_interval(interval):
+        # if the interval has 0 length
+
+            #pass
+
+        # open up stats json into data
+        
+        # loop through session to find a not finished one
+
+            # if there is one
+
+                # save it to the session
+
+
+            # else
+
+                # create a new session and save the interval into it
+        
+        # save the updated stats to the json
+        pass 
+
     # loads todays stats from stats file
     def load_today_stats(self, sender):
         # reset the stats to zero
