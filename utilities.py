@@ -1,3 +1,5 @@
+from playsound import playsound
+
 def secs_to_time(seconds, hours=False):
     """Takes an integer of seconds and convertes it into a mm:ss string, or a HHh:MMm string
 
@@ -16,5 +18,8 @@ def secs_to_time(seconds, hours=False):
         mins, secs = divmod(seconds, 60)
         return '{:02d}:{:02d}'.format(mins, secs)
 
-def button_sound():
-    
+def button_sound(allow_sound):
+    if allow_sound:
+        playsound("sounds/button.mp3")
+    else:
+        pass

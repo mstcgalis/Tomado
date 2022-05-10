@@ -2,7 +2,6 @@ from subprocess import call
 import rumps
 import json
 import time
-from playsound import playsound
 
 from utilities import *
 
@@ -544,11 +543,8 @@ class Tomado(object):
     # starts the timer
     def start_timer(self, sender):
         # check if the function is being triggered by a button
-        try: 
-            if sender.title.split()[0] == "Start" and self.prefs.get("allow_sound"):
-            # if yes, play a sound
-                button_sound()
-        except: pass
+        if type(sender) == rumps.rumps.MenuItem:
+            button_sound(self.prefs.get("allow_sound"))
         # define the timer length from preferences
         self.timer.end = self.prefs.get("{}_length".format(self.get_current_interval_type()))
         # start the timer
@@ -588,8 +584,7 @@ class Tomado(object):
 
     # continues the interval
     def continue_timer(self, sender):
-        if sender.title.split()[0] == "Continue" and self.prefs.get("allow_sound"):
-            button_sound()
+        button_sound(self.prefs.get("allow_sound"))
         # starts the timer
         self.timer.start()
         # replaces the continue button with the pause button
@@ -597,8 +592,7 @@ class Tomado(object):
     
     # resets the interval
     def reset_timer(self, sender):
-        if self.prefs.get("allow_sound"):
-            button_sound()
+        button_sound(self.prefs.get("allow_sound"))
         # load the next interval
         self.loaded_state()
         # start the timer
@@ -606,8 +600,7 @@ class Tomado(object):
 
     # skipis the interval
     def skip_timer(self, sender):
-        if self.prefs.get("allow_sound"):
-            button_sound()
+        button_sound(self.prefs.get("allow_sound"))
         # if the timer has not started yet
         if self.timer.count == 0:
             self.session_current[self.get_current_interval()] = 0
