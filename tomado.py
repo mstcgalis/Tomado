@@ -361,7 +361,7 @@ class Tomado(object):
 
     #TODO saves interval to current (not ended) session
     def save_interval(self, save_interval, save_length):
-        if length == 0:
+        if save_length == 0:
             return False
 
         # open up stats json into data
@@ -382,10 +382,12 @@ class Tomado(object):
                         sessions["{}_{}".format(current_date, current_time)] = {"{}_{}".format(save_interval, current_time) : save_length}
                         new_session = True
             else:
-            create current_week
-            create new_session
-            new_session = True
-            save the interval to new_session
+                data["{}".format(current_week)] = { #new week
+                    "{}_{}".format(current_date, current_time) : { # new session
+                        "{}_{}".format(save_interval, current_time) : save_length # saved interval
+                        }
+                    }
+                new_session = True
         
         # save the updated stats to the json
         with open(self.stats_path, "w") as f:
