@@ -212,6 +212,7 @@ class Tomado(object):
 
         #FIXME TESTING
         self.save_interval("pomodoro", 10)
+        self.end_session(sender="")
     
     ## STATES AND MENUS
     # sets the app to the default menu and resets timer
@@ -318,9 +319,8 @@ class Tomado(object):
         # stop the timer
         self.timer.stop()
         # if the timer hasnt been started
-        if self.get_current_interval() != None:
-            #TODO: save interval
-            self.save_interval(self.get_current_interval_type, self.timer.count - 1)
+        #TODO: save interval
+        self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
 
         # open the data dictionary from json
         with open(self.stats_path) as f:
@@ -334,16 +334,16 @@ class Tomado(object):
 
         for week, sessions in stats.items():
             if week == current_week:
-                for session, intervals in session.keys():
-                    sessions.pop(session)
+                for session, intervals in sessions.items():
                     if "-" not in session:
                         sessions_update = {
                             "{}-{}_{}".format(session, current_date, current_time) : intervals
                         }
+                        sessions.update(sessions_update)
+                        break
+                sessions.pop(session)
         
-        # write the new data dictionary to json
-        with open(self.stats_path, "w") as f:
-            json.dump(stats, f, indent=2)
+        save_file(self.stats_path, stats)
 
         # load todays stats from data
         self.load_today_stats(sender="")
@@ -351,10 +351,9 @@ class Tomado(object):
     
     ## STATS
     def save_interval(self, save_interval, save_length):
-        if save_length == 0 or False:
+        if save_length <= 0 or not save_length or save_length == None:
             return False
-
-        new_session = False
+        saved = False
 
         # open up stats json into data
         with open(self.stats_path) as f:
@@ -365,23 +364,27 @@ class Tomado(object):
         current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
         current_time = time.strftime("%H:%M%:%S", time.localtime(time.time()))
 
-        for week, sessions in stats.items():
-            if week == current_week:
-                for session, intervals in sessions.items():
-                    if "-" not in session: # session has not ended yet
-                        intervals_update = {
-                            "{}_{}".format(save_interval, current_time) : save_length
-                        }
-                        intervals.update(intervals_update)
-                    else: # there is not current session
-                        sessions_update = {
-                            "{}_{}".format(current_date, current_time) : {
-                                "{}_{}".format(save_interval, current_time) : save_length
+        while not saved:
+                for week, sessions in stats.items():
+                    if week == current_week:
+                        for session, intervals in sessions.items():
+                            if "-" not in session: # session has not ended yet
+                                intervals_update = {
+                                    "{}_{}".format(save_interval, current_time) : save_length
                                 }
-                        }
-                        sessions.update(sessions_update)
-                        new_session = True
-            else:
+                                intervals.update(intervals_update)
+                                save_file(self.stats_path, stats)
+                                return True # saved interval into current session
+                            else: # there is not current session
+                                sessions_update = {
+                                    "{}_{}".format(current_date, current_time) : {
+                                        "{}_{}".format(save_interval, current_time) : save_length
+                                        }
+                                }
+                                sessions.update(sessions_update)
+                                save_file(self.stats_path, stats)
+                                return True # created new session and save interval
+                # if stats is empty or there isnt current_week yet
                 stats_update = {
                     "{}".format(current_week) : {
                         "{}_{}".format(current_date, current_time) : {
@@ -390,13 +393,9 @@ class Tomado(object):
                     }
                 }
                 stats.update(stats_update)
-                new_session = True
-        
-        # save the updated stats to the json
-        with open(self.stats_path, "w") as f:
-            json.dump(stats, f, indent=2)
-        
-        return new_session #if a new session has been created
+                save_file(self.stats_path, stats)
+                return True # created new week, new session and saved interval
+        return False # for some reason it hasnt been saved idk if this happens?
 
     # loads todays stats from stats file
     #TODO handle a interval saving in a later week than the start of a session
