@@ -1,4 +1,5 @@
 from playsound import playsound
+import json
 
 def secs_to_time(seconds, hours=False):
     """Takes an integer of seconds and convertes it into a mm:ss string, or a HHh:MMm string
@@ -28,3 +29,8 @@ def button_sound(allow_sound):
         playsound("sounds/button.mp3")
     else:
         pass
+
+# save the updated data to json
+def save_file(file_path, data):
+    with open(file_path, "w") as f:
+        json.dump(data, f, indent=2)
