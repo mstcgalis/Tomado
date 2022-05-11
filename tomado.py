@@ -211,7 +211,7 @@ class Tomado(object):
         self.startup_display_preferences()
 
         #FIXME TESTING
-        self.save_interval("pomdoro", 10)
+        self.save_interval("pomodoro", 10)
     
     ## STATES AND MENUS
     # sets the app to the default menu and resets timer
@@ -364,34 +364,37 @@ class Tomado(object):
         if save_length == 0:
             return False
 
+        new_session = False
+
         # open up stats json into data
         with open(self.stats_path) as f:
-            try: data = json.load(f)
-            except: data = {}
+            try: stats = json.load(f)
+            except: stats = {}
         
         current_week = time.strftime("%Y_%W", time.localtime(time.time()))
         current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
-        current_time = time.strftime("%H:%M%:S%", time.localtime(time.time()))
+        current_time = time.strftime("%H:%M%:%S", time.localtime(time.time()))
 
-        for week, sessions in data:
-            if week == current_week:
-                for session, intervals in sessions:
-                    if "-" not in session: # session has not ended yet
-                        intervals["{}_{}".format(save_interval, current_time)] = save_length
-                    else: # there is not current session
-                        sessions["{}_{}".format(current_date, current_time)] = {"{}_{}".format(save_interval, current_time) : save_length}
-                        new_session = True
-            else:
-                data["{}".format(current_week)] = { #new week
-                    "{}_{}".format(current_date, current_time) : { # new session
-                        "{}_{}".format(save_interval, current_time) : save_length # saved interval
-                        }
+        if bool(stats):
+            for week, sessions in stats.items():
+                if week == current_week:
+                    for session, intervals in sessions.items():
+                        if "-" not in session: # session has not ended yet
+                            intervals["{}_{}".format(save_interval, current_time)] = save_length
+                        else: # there is not current session
+                            sessions["{}_{}".format(current_date, current_time)] = {"{}_{}".format(save_interval, current_time) : save_length}
+                            new_session = True
+        else:
+            stats["{}".format(current_week)] = { #new week
+                "{}_{}".format(current_date, current_time) : { # new session
+                    "{}_{}".format(save_interval, current_time) : save_length # saved interval
                     }
-                new_session = True
+                }
+            new_session = True
         
         # save the updated stats to the json
         with open(self.stats_path, "w") as f:
-            json.dump(data, f, indent=2)
+            json.dump(stats, f, indent=2)
         
         return new_session #if a new session has been created
 
