@@ -1,5 +1,9 @@
 ## HEADER
 # FIXME: rework stats system
+# FIXME: pressing End Session while timer is ticking doesnt swith button to Start Pomodoro
+#           - should be done in stop_timer
+# FIXME: pressing Skip Timer while timer is ticking doesnt swith button to Start Pomodoro
+#           - shoudl be done is skip_timer
 
 from subprocess import call
 import rumps
@@ -318,8 +322,7 @@ class Tomado(object):
     def end_session(self, sender):
         # stop the timer
         self.timer.stop()
-        # if the timer hasnt been started
-        #TODO: save interval
+        # save interval
         self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
 
         # open the data dictionary from json
@@ -327,7 +330,7 @@ class Tomado(object):
             try: stats = json.load(f)
             except: stats = {}
 
-        #TODO add end time to current session
+        # adds end time to current session
         current_week = time.strftime("%Y_%W", time.localtime(time.time()))
         current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
         current_time = time.strftime("%H:%M%:%S", time.localtime(time.time()))
@@ -615,11 +618,10 @@ class Tomado(object):
         self.timer.end = 0
         # notify the user according to the current timer type
         self.notification(self.get_current_interval_type())
-
         # set the just passed interval to the time it has elapsed
         self.session_current[self.get_current_interval()] = self.timer.count - 1
-
-        #TODO: save interval into stats file, into a session without end time
+        # save interval
+        self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
 
         # load the next interval, get info about whether a new session has been started
         new_session = self.loaded_state()
@@ -689,7 +691,6 @@ class Tomado(object):
         self.app.run()
     # quits this app
     def quit(self, sender):
-        self.end_session(sender=None)
         rumps.quit_application(sender=None)
 
 ## RUN
