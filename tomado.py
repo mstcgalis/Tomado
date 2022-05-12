@@ -221,7 +221,6 @@ class Tomado(object):
 
         if autostart and not new_session and sender != "startup":
             first_button = self.pause_button
-            print("heloo")
         else:
             first_button = self.start_button
 
@@ -317,6 +316,7 @@ class Tomado(object):
 
     # ends and saves current session
     def end_session(self, sender):
+        button_sound(self.prefs.get("allow_sound"))
         # stop the timer
         self.timer.stop()
         # save interval
@@ -345,6 +345,9 @@ class Tomado(object):
         
         save_file(self.stats_path, stats)
 
+        self.session_current.clear()
+        self.create_session()
+
         # load the next interval
         self.loaded_state("end_session")
         # load todays stats from data
@@ -353,7 +356,6 @@ class Tomado(object):
     
     ## STATS
     def save_interval(self, save_interval, save_length):
-        print("this")
         if save_length <= 0 or not save_length or save_length == None:
             return False
 
@@ -417,7 +419,6 @@ class Tomado(object):
                     if session.split("_")[0] == current_date or session.split("-")[1].split("_")[0] == current_date or session.split("-")[1].split("_")[0] == current_date:
                         for interval, length in intervals.items():
                             if interval.split("_")[1] == current_date:
-                                print("hello1")
                                 if interval.split("_")[0] == "pomodoro":
                                     self.pomodoro_time_today += length
                                     self.pomodoros_today += 1
@@ -427,35 +428,6 @@ class Tomado(object):
         
         self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, secs_to_time(self.pomodoro_time_today, hours=True))
         self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, secs_to_time(self.breakes_time_today, hours=True))
-
-    #     # clear the old session
-    #     self.session_current.clear()
-    #     # create a new session
-    #     self.create_session()
-
-    #     # if sender != "loaded":
-    #     #     # load the next interval into the timer
-    #     #     self.loaded_state("load_today_stats")
-
-    # # updates today's stats
-    # def update_today_stats(self, sender):
-    #     # add stats from the current session
-    #     for interval, length in self.session_current.items():
-    #     # if its a pomodoro interval and it has already elapsed some time
-    #         if interval.split("_")[0] == "pomodoro" and type(length) != bool:
-    #             # add one to the pomodoro counter
-    #             self.pomodoros_today += 1
-    #             # add its length to the pomodoro time counter
-    #             self.pomodoro_time_today += length
-    #         # else it is a break or long break and it has already elapsed some time
-    #         elif type(length) != bool:
-    #             # add one to the break counter
-    #             self.breakes_today += 1
-    #             # add its length to the break time counter 
-    #             self.breakes_time_today += length
-    #     # pass the stats into the appropriate buttons
-    #     self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, secs_to_time(self.pomodoro_time_today, hours=True))
-    #     self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, secs_to_time(self.breakes_time_today, hours=True))
 
     ## PREFERENCES
     # method to display correct preferences on start up
@@ -593,8 +565,6 @@ class Tomado(object):
         self.timer.end = self.prefs.get("{}_length".format(self.get_current_interval_type()))
         # start the timer
         self.timer.start()
-        self.update_menu()
-        # update the session info
         self.update_session_info()
     
     # stops the timer
