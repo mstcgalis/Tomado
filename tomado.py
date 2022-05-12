@@ -618,10 +618,10 @@ class Tomado(object):
         self.timer.end = 0
         # notify the user according to the current timer type
         self.notification(self.get_current_interval_type())
-        # set the just passed interval to the time it has elapsed
-        self.session_current[self.get_current_interval()] = self.timer.count - 1
         # save interval
         self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
+        # set the just passed interval to the time it has elapsed
+        self.session_current[self.get_current_interval()] = self.timer.count - 1
 
         # load the next interval, get info about whether a new session has been started
         new_session = self.loaded_state()
