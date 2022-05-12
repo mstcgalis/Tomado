@@ -95,19 +95,17 @@ class Tomado(object):
         }
         # path to the preferences file
         self.prefs_path = str(self.folder + "/prefs.json")
-        # if it exists, load prefs from the json in prefs_path
-        try: 
-            with open(self.prefs_path, "r") as f:
-                self.prefs = json.load(f)
-        # if there is no file, load the default prefs 
-        except:
+        # open prefs from file
+        self.prefs = open_file(self.prefs_path)
+        # if it is empty (file didnt exist), use default prefs
+        if not bool(self.prefs):
             self.prefs = self.default_prefs    
         
         ## STATS
         # path to the stats file
         self.stats_path = str(self.folder + '/stats.json')
-        # if it exists, load stats from the json in stats_path
-        with open(self.stats_path, "a") as data:
+        # if stats file doesnt exist, create it
+        with open(self.stats_path, "a") as f:
             pass
         # create stats variables
         self.pomodoros_today = 0
@@ -213,9 +211,6 @@ class Tomado(object):
         self.loaded_state()
         # display the right preferences (sound toggle, sound select, autostart toggles)
         self.startup_display_preferences()
-
-        #FIXME TESTING
-        self.save_interval("pomodoro", 10)
     
     ## STATES AND MENUS
     # sets the app to the default menu and resets timer
@@ -355,12 +350,8 @@ class Tomado(object):
     def save_interval(self, save_interval, save_length):
         if save_length <= 0 or not save_length or save_length == None:
             return False
-        saved = False
 
-        # open up stats json into data
-        with open(self.stats_path) as f:
-            try: stats = json.load(f)
-            except: stats = {}
+        stats = open_file(self.stats_path)
         
         current_week = time.strftime("%Y_%W", time.localtime(time.time()))
         current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
@@ -408,16 +399,11 @@ class Tomado(object):
         self.pomodoro_time_today = 0
         self.breakes_today = 0
         self.breakes_time_today = 0
-        with open(self.stats_path) as f:
-            # try reading and unsearilizing the file
-            try:
-                data = json.load(f)
-            # if it is empty, return this function
-            except json.decoder.JSONDecodeError: return
+        stats = open_file(self.stats_path)
         # try reading today data from the saved_sessions
         try:
             # from the data dict, get todays dict of sessions using todays date in the Y_M_D (2022_1_13) format as the key
-            today = data[time.strftime("%Y_%m_%d",time.localtime(time.time()))]
+            today = stats[time.strftime("%Y_%m_%d",time.localtime(time.time()))]
             # loop through todays sessions without their epoch time keys
             for session in today.values():
                 # in each session, loop thourgh the intervals and length they elapsed
@@ -465,11 +451,6 @@ class Tomado(object):
         self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, secs_to_time(self.breakes_time_today, hours=True))
 
     ## PREFERENCES
-    # save preferences to a file after change
-    def save_preferences(self):
-        with open(self.prefs_path, "w") as f:
-            json.dump(self.prefs, f)
-
     # method to display correct preferences on start up
     def startup_display_preferences(self):
         # AUTOSTART
@@ -511,7 +492,7 @@ class Tomado(object):
             sender.state = 1
         else:
             sender.state = 0
-        self.save_preferences()
+        self.save_file(self.prefs_path, self.prefs)
 
     # changes the length of an interval
     def change_length(self, sender):
@@ -536,7 +517,7 @@ class Tomado(object):
         if self.timer.count == 0:
             #set the menu bar timer text to the new length
             self.app.title = secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
-        self.save_preferences()
+        save_file(self.prefs_path, self.prefs)
 
     ## SOUNDS
     # change the timer sound
@@ -546,7 +527,7 @@ class Tomado(object):
         for sound in self.sound_options:
             if sound.title != sender.title:
                 sound.state = 0
-        self.save_preferences()
+        save_file(self.prefs_path, self.prefs)
 
     # toggle sounds
     def sounds_toggle(self, sender):
@@ -557,7 +538,7 @@ class Tomado(object):
             sender.state = 1
         else:
             sender.state = 0
-        self.save_preferences()
+        save_file(self.prefs_path, self.prefs)
     
     ## NOTIFICATIONS
     # interval notification
