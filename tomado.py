@@ -216,7 +216,6 @@ class Tomado(object):
 
         #FIXME TESTING
         self.save_interval("pomodoro", 10)
-        self.end_session(sender="")
     
     ## STATES AND MENUS
     # sets the app to the default menu and resets timer
@@ -367,38 +366,35 @@ class Tomado(object):
         current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
         current_time = time.strftime("%H:%M%:%S", time.localtime(time.time()))
 
-        while not saved:
-                for week, sessions in stats.items():
-                    if week == current_week:
-                        for session, intervals in sessions.items():
-                            if "-" not in session: # session has not ended yet
-                                intervals_update = {
-                                    "{}_{}".format(save_interval, current_time) : save_length
-                                }
-                                intervals.update(intervals_update)
-                                save_file(self.stats_path, stats)
-                                return True # saved interval into current session
-                            else: # there is not current session
-                                sessions_update = {
-                                    "{}_{}".format(current_date, current_time) : {
-                                        "{}_{}".format(save_interval, current_time) : save_length
-                                        }
-                                }
-                                sessions.update(sessions_update)
-                                save_file(self.stats_path, stats)
-                                return True # created new session and save interval
-                # if stats is empty or there isnt current_week yet
-                stats_update = {
-                    "{}".format(current_week) : {
-                        "{}_{}".format(current_date, current_time) : {
+        for week, sessions in stats.items():
+            if week == current_week:
+                for session, intervals in sessions.items():
+                    if "-" not in session: # session has not ended yet
+                        intervals_update = {
                             "{}_{}".format(save_interval, current_time) : save_length
                         }
-                    }
+                        intervals.update(intervals_update)
+                        save_file(self.stats_path, stats)
+                        return True # saved interval into current session
+                sessions_update = {
+                    "{}_{}".format(current_date, current_time) : {
+                        "{}_{}".format(save_interval, current_time) : save_length
+                        }
                 }
-                stats.update(stats_update)
+                sessions.update(sessions_update)
                 save_file(self.stats_path, stats)
-                return True # created new week, new session and saved interval
-        return False # for some reason it hasnt been saved idk if this happens?
+                return True # created new session and save interval
+        # if stats is empty or there isnt current_week yet
+        stats_update = {
+            "{}".format(current_week) : {
+                "{}_{}".format(current_date, current_time) : {
+                    "{}_{}".format(save_interval, current_time) : save_length
+                }
+            }
+        }
+        stats.update(stats_update)
+        save_file(self.stats_path, stats)
+        return True # created new week, new session and saved interval
 
     # loads todays stats from stats file
     #TODO handle a interval saving in a later week than the start of a session
