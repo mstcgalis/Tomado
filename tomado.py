@@ -1,6 +1,6 @@
 ## HEADER
 # TODO: loading today stats from new stats syystem
-# FIXME: Autostart brake doesnt swap first button for pause
+# FIXME: loaded_state from reset timer autostarts when it shouldnt
 
 from subprocess import call
 import rumps
@@ -207,18 +207,26 @@ class Tomado(object):
         # load todays stats from data
         self.load_today_stats(sender="")
         # loaded state of timer
-        self.loaded_state()
+        self.loaded_state("startup")
         # display the right preferences (sound toggle, sound select, autostart toggles)
         self.startup_display_preferences()
     
     ## STATES AND MENUS
     # sets the app to the default menu and resets timer
-    def loaded_state(self):
+    def loaded_state(self, sender):
 
         #stop the current timer
         self.timer.stop()
         #reset the current timer
         self.timer.count = 0
+
+        autostart = False
+        if self.prefs.get("autostart_pomodoro") == True and self.get_current_interval_type() == "pomodoro":
+            autostart = True
+        if self.prefs.get("autostart_break") == True and self.get_current_interval_type() == "break":
+            autostart = True
+        if self.prefs.get("autostart_break") == True and self.get_current_interval_type() == "long":
+            autostart = True
 
         # variable representing whether a new session has been started
         new_session = False
@@ -233,15 +241,16 @@ class Tomado(object):
         self.app.title = secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
         self.app.icon = self.config.get("{}_symbol".format(self.get_current_interval_type())) 
 
+        if autostart and not new_session and sender != "startup":
+            first_button = self.pause_button
+        else:
+            first_button = self.start_button
+
         # set the menu to the default (first button is Start)
-        try:
-            self.swap_menu_item(self.pause_button, self.start_button)
-        except:
-            pass
-        try:
-            self.swap_menu_item(self.continue_button, self.start_button)
-        except:
-            pass
+        try: self.swap_menu_item(self.pause_button, first_button)
+        except: pass
+        try: self.swap_menu_item(self.continue_button, first_button)
+        except: pass
 
         # update the menu buttons
         self.update_menu()
@@ -250,8 +259,8 @@ class Tomado(object):
         # update todays stats
         self.update_today_stats(sender="")
 
-        # return variable representing info about whether a new session has been started
-        return new_session
+        if autostart and not new_session and sender != "startup":
+            self.start_timer(sender="")
     
     # replaces a MenuItem with another MenuItem
     def swap_menu_item(self, original_item, new_item):
@@ -352,7 +361,7 @@ class Tomado(object):
         save_file(self.stats_path, stats)
 
         # load the next interval
-        self.loaded_state()
+        self.loaded_state("end_session")
         # load todays stats from data
         self.load_today_stats(sender="")
 
@@ -440,7 +449,7 @@ class Tomado(object):
 
         # if sender != "loaded":
         #     # load the next interval into the timer
-        #     self.loaded_state()
+        #     self.loaded_state("load_today_stats")
 
     # updates today's stats
     def update_today_stats(self, sender):
@@ -611,18 +620,8 @@ class Tomado(object):
         self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
         # set the just passed interval to the time it has elapsed
         self.session_current[self.get_current_interval()] = self.timer.count - 1
-
-        # load the next interval, get info about whether a new session has been started
-        new_session = self.loaded_state()
-        
-        # autostart if a new session hasnt been started
-        if not new_session:
-            if self.prefs.get("autostart_pomodoro") == True and self.get_current_interval_type() == "pomodoro":
-                self.start_timer(sender="")
-            if self.prefs.get("autostart_break") == True and self.get_current_interval_type() == "break":
-                self.start_timer(sender="")
-            if self.prefs.get("autostart_break") == True and self.get_current_interval_type() == "long":
-                self.start_timer(sender="")
+        # load the next interval
+        self.loaded_state("stop_timer")
 
 
     # pauses the interval
@@ -645,7 +644,7 @@ class Tomado(object):
     def reset_timer(self, sender):
         button_sound(self.prefs.get("allow_sound"))
         # load the next interval
-        self.loaded_state()
+        self.loaded_state("reset_timer")
         # start the timer
         self.start_timer(sender="")
 
@@ -658,13 +657,8 @@ class Tomado(object):
         else:
             # set the just passed interval to the time it has elapsed
             self.session_current[self.get_current_interval()] = self.timer.count - 1
-        try: print("\ntest:", self.saved_sessions[time.strftime("%Y_%m_%d",time.localtime(time.time()))])
-        except: pass
-        # load the next interval and get info whether a new session has been started
-        new_session = self.loaded_state()
-        # autostart if a new session hasnt been started
-        if not new_session:
-            self.start_timer(sender="")
+        # load the next interval
+        self.loaded_state("skip_timer")
     
     # shows info about the app
     def about_info(self, sender):
