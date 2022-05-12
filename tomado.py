@@ -233,7 +233,7 @@ class Tomado(object):
         # check wheter the session is not over aka there is not a bool value in session
         if self.get_current_interval_type() == False:
             #if it is over, trigger a method for ending a session
-            self.end_session(sender="loaded")
+            self.end_session(sender="loaded_state")
             #save the info about a new session starting to a variable
             new_session = True
 
@@ -645,8 +645,6 @@ class Tomado(object):
         button_sound(self.prefs.get("allow_sound"))
         # load the next interval
         self.loaded_state("reset_timer")
-        # start the timer
-        self.start_timer(sender="")
 
     # skips the interval
     def skip_timer(self, sender):
