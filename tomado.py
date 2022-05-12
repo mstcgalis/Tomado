@@ -1,6 +1,4 @@
 ## HEADER
-# TODO: loading today stats from new stats syystem
-# FIXME: when autostart is on, pause_button.title is just Pause
 
 from subprocess import call
 import rumps
@@ -191,10 +189,6 @@ class Tomado(object):
         self.loaded_state("startup")
         # display the right preferences (sound toggle, sound select, autostart toggles)
         self.startup_display_preferences()
-
-        # ## TEST
-        # self.skip_timer("")
-        # self.skip_timer("")
     
     ## STATES AND MENUS
     # sets the app to the default menu and resets timer
