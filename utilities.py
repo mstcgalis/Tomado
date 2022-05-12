@@ -1,5 +1,6 @@
 from playsound import playsound
 import json
+import rumps
 
 def secs_to_time(seconds, hours=False):
     """Takes an integer of seconds and convertes it into a mm:ss string, or a HHh:MMm string
@@ -29,6 +30,27 @@ def button_sound(allow_sound):
         playsound("sounds/button.mp3")
     else:
         pass
+
+def create_submenu(button_list, callback, type=""):
+    """Creates a submenu containing rumps.MenuItem objects from a list of strings
+
+    Args:
+        button_list (list of strings): list of button names in submenu
+        type (string): type of interval (pomodoro/break/long)
+        callback (function/method): callback function that will be triggered by the buttons
+
+    Returns:
+        list: list containing rumps.MenuItem objects
+    """
+    submenu = []
+    for n in button_list:
+        if type != "":
+            button = rumps.MenuItem("{} Minutes".format(n), callback=callback)
+        else:
+            button = rumps.MenuItem("{}".format(n), callback=callback)
+        button.type = type
+        submenu.append(button)
+    return submenu
 
 # save the updated data to json
 #TODO docstring
