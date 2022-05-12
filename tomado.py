@@ -270,11 +270,12 @@ class Tomado(object):
 
     # updates timer control button titles with correct interval types
     def update_menu(self):
-        self.start_button.title = "Start {}".format(self.get_current_interval_type(full_text=True))
-        self.pause_button.title = "Pause {}".format(self.get_current_interval_type(full_text=True))
-        self.continue_button.title = "Continue {}".format(self.get_current_interval_type(full_text=True))
-        self.skip_button.title = "Skip {}".format(self.get_current_interval_type(full_text=True))
-        self.reset_button.title = "Reset {}".format(self.get_current_interval_type(full_text=True))
+        current_interval = self.get_current_interval_type()
+        self.start_button.title = "Start {}".format(current_interval.capitalize())
+        self.pause_button.title = "Pause {}".format(current_interval.capitalize())
+        self.continue_button.title = "Continue {}".format(current_interval.capitalize())
+        self.skip_button.title = "Skip {}".format(current_interval.capitalize())
+        self.reset_button.title = "Reset {}".format(current_interval.capitalize())
 
     ## SESSION
     # returns the current interval TYPE from current_session dict
