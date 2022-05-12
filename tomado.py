@@ -1,5 +1,5 @@
 ## HEADER
-# FIXME: rework stats system
+# TODO: loading today stats from new stats syystem
 # FIXME: pressing End Session while timer is ticking doesnt swith button to Start Pomodoro
 #           - should be done in stop_timer
 # FIXME: pressing Skip Timer while timer is ticking doesnt swith button to Start Pomodoro
