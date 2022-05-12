@@ -35,3 +35,11 @@ def button_sound(allow_sound):
 def save_file(file_path, data):
     with open(file_path, "w") as f:
         json.dump(data, f, indent=2)
+
+# open up stats json into data, which is then returned
+#TODO docstring
+def open_file(file_path):
+    with open(file_path) as f:
+        try: data = json.load(f)
+        except: data = {}
+    return data
