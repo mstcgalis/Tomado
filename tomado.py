@@ -1,6 +1,6 @@
 ## HEADER
 # TODO: loading today stats from new stats syystem
-# FIXME: loaded_state from reset timer autostarts when it shouldnt
+# FIXME: when autostart is on, pause_button.title is just Pause
 
 from subprocess import call
 import rumps
@@ -11,25 +11,6 @@ from utilities import *
 
 
 class Tomado(object):
-    ## UTILITIES
-    def create_submenu(self, button_list, callback, type=""):
-        """Creates a submenu containing rumps.MenuItem objects from a list of strings
-
-        Args:
-            button_list (list of strings): list of button names in submenu
-            type (string): type of interval (pomodoro/break/long)
-            callback (function/method): callback function that will be triggered by the buttons
-
-        Returns:
-            list: list containing rumps.MenuItem objects
-        """
-        submenu = []
-        for n in button_list:
-            button = rumps.MenuItem("{} Minutes".format(n), callback=callback)
-            button.type = type
-            submenu.append(button)
-        return submenu
-
     def __init__(self):
         ## CONFIG
         # settings that cant't be user defined for now
@@ -122,13 +103,13 @@ class Tomado(object):
         self.prefereces_button = rumps.MenuItem("Preferences")
         # pomodoro interval preference
         self.pomodoro_length_button = rumps.MenuItem("Pomodoro Length")
-        self.pomodoro_length_options = self.create_submenu(self.config.get("pomodoro_length_options"), self.change_length, "pomodoro")
+        self.pomodoro_length_options = create_submenu(self.config.get("pomodoro_length_options"), self.change_length, "pomodoro")
         # break length preference
         self.break_length_button = rumps.MenuItem("Short Break Length")
-        self.break_length_options = self.create_submenu(self.config.get("break_length_options"), self.change_length, "break")
+        self.break_length_options = create_submenu(self.config.get("break_length_options"), self.change_length, "break")
         # long break length preference
         self.long_length_button = rumps.MenuItem("Long Break Length")
-        self.long_length_options = self.create_submenu(self.config.get("long_length_options"), self.change_length, "long")
+        self.long_length_options = create_submenu(self.config.get("long_length_options"), self.change_length, "long")
         # autostart pomodoros toggle
         self.autostart_pomodoro_button = rumps.MenuItem("Autostart Pomodoros", callback=self.autostart_toggle)
         self.autostart_pomodoro_button.type = "pomodoro"
@@ -139,7 +120,7 @@ class Tomado(object):
         self.allow_sounds_button = rumps.MenuItem("Allow Sounds", callback=self.sounds_toggle)
         # sound preferences
         self.sound_preferences_button = rumps.MenuItem("Timer Sound")
-        self.sound_options = self.create_submenu(self.config.get("sound_options"), self.change_sound)
+        self.sound_options = create_submenu(self.config.get("sound_options"), self.change_sound)
         
         # stats today submenu
         self.today_stats_submenu = rumps.MenuItem("Today's Stats")
@@ -155,15 +136,15 @@ class Tomado(object):
 
         ## TIMER BUTTONS
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.start_button = rumps.MenuItem("Start {}".format(self.get_current_interval_type(full_text=True)), callback=self.start_timer, key="s", icon="icons/start.png", template=True)
+        self.start_button = rumps.MenuItem("Start", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
         # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_button = rumps.MenuItem("Pause {}".format(self.get_current_interval_type(full_text=True)), callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
+        self.pause_button = rumps.MenuItem("Pause", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
-        self.continue_button = rumps.MenuItem("Continue {}".format(self.get_current_interval_type(full_text=True)), callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
+        self.continue_button = rumps.MenuItem("Continue", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
         # the skip_pomodoro button is created as a rumps.MenuItem, callback is the skip_timer method
-        self.skip_button = rumps.MenuItem("Skip {}".format(self.get_current_interval_type(full_text=True)), callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
+        self.skip_button = rumps.MenuItem("Skip", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
         # the reset_pomodoro button is created as a rumps.MenuItem, callback is the reset_timer method
-        self.reset_button = rumps.MenuItem("Reset {}".format(self.get_current_interval_type(full_text=True)), callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
+        self.reset_button = rumps.MenuItem("Reset", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
         ## MENUS
         self.menus = {"default_menu" : 
@@ -246,11 +227,12 @@ class Tomado(object):
         else:
             first_button = self.start_button
 
-        # set the menu to the default (first button is Start)
-        try: self.swap_menu_item(self.pause_button, first_button)
-        except: pass
-        try: self.swap_menu_item(self.continue_button, first_button)
-        except: pass
+        if not autostart:
+            # set the menu to the default (first button is Start)
+            try: self.swap_menu_item(self.pause_button, first_button)
+            except: pass
+            try: self.swap_menu_item(self.continue_button, first_button)
+            except: pass
 
         # update the menu buttons
         self.update_menu()
@@ -264,6 +246,8 @@ class Tomado(object):
     
     # replaces a MenuItem with another MenuItem
     def swap_menu_item(self, original_item, new_item):
+        original_item.title = original_item.title.split()[0]
+        new_item.title = new_item.title.split()[0]
         self.app.menu.insert_after(original_item.title, new_item)
         self.app.menu.pop(original_item.title)
         self.update_menu()
@@ -514,7 +498,7 @@ class Tomado(object):
             sender.state = 1
         else:
             sender.state = 0
-        self.save_file(self.prefs_path, self.prefs)
+        save_file(self.prefs_path, self.prefs)
 
     # changes the length of an interval
     def change_length(self, sender):
@@ -539,6 +523,7 @@ class Tomado(object):
         if self.timer.count == 0:
             #set the menu bar timer text to the new length
             self.app.title = secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
+
         save_file(self.prefs_path, self.prefs)
 
     ## SOUNDS
@@ -607,6 +592,7 @@ class Tomado(object):
         self.timer.start()
         # replace the start button to the pause button
         self.swap_menu_item(self.start_button, self.pause_button)
+        self.update_menu()
         # update the session info
         self.update_session_info()
     
