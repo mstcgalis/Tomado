@@ -1,9 +1,6 @@
 ## HEADER
 # TODO: loading today stats from new stats syystem
-# FIXME: pressing End Session while timer is ticking doesnt swith button to Start Pomodoro
-#           - should be done in stop_timer
-# FIXME: pressing Skip Timer while timer is ticking doesnt swith button to Start Pomodoro
-#           - shoudl be done is skip_timer
+# FIXME: Autostart brake doesnt swap first button for pause
 
 from subprocess import call
 import rumps
@@ -203,8 +200,10 @@ class Tomado(object):
             }
         
         ## DEFAULT menu and state
-        # set the menu to the default
+        # set the menu to the default (first button is Start)
         self.app.menu.update(self.menus.get("default_menu"))
+        # set the menu to the right interval types
+        self.update_menu()
         # load todays stats from data
         self.load_today_stats(sender="")
         # loaded state of timer
@@ -233,6 +232,16 @@ class Tomado(object):
         # change the title to the current interval
         self.app.title = secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
         self.app.icon = self.config.get("{}_symbol".format(self.get_current_interval_type())) 
+
+        # set the menu to the default (first button is Start)
+        try:
+            self.swap_menu_item(self.pause_button, self.start_button)
+        except:
+            pass
+        try:
+            self.swap_menu_item(self.continue_button, self.start_button)
+        except:
+            pass
 
         # update the menu buttons
         self.update_menu()
@@ -342,6 +351,8 @@ class Tomado(object):
         
         save_file(self.stats_path, stats)
 
+        # load the next interval
+        self.loaded_state()
         # load todays stats from data
         self.load_today_stats(sender="")
 
@@ -426,9 +437,10 @@ class Tomado(object):
         self.session_current.clear()
         # create a new session
         self.create_session()
-        if sender != "loaded":
-            # load the next interval into the timer
-            self.loaded_state()
+
+        # if sender != "loaded":
+        #     # load the next interval into the timer
+        #     self.loaded_state()
 
     # updates today's stats
     def update_today_stats(self, sender):
