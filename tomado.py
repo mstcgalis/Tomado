@@ -191,6 +191,10 @@ class Tomado(object):
         self.loaded_state("startup")
         # display the right preferences (sound toggle, sound select, autostart toggles)
         self.startup_display_preferences()
+
+        # ## TEST
+        # self.skip_timer("")
+        # self.skip_timer("")
     
     ## STATES AND MENUS
     # sets the app to the default menu and resets timer
@@ -224,15 +228,18 @@ class Tomado(object):
 
         if autostart and not new_session and sender != "startup":
             first_button = self.pause_button
+            print("heloo")
         else:
             first_button = self.start_button
 
-        if not autostart:
-            # set the menu to the default (first button is Start)
-            try: self.swap_menu_item(self.pause_button, first_button)
-            except: pass
-            try: self.swap_menu_item(self.continue_button, first_button)
-            except: pass
+
+        # set the first button to either Start or Pause
+        try :self.swap_menu_item(self.start_button, first_button)
+        except: pass
+        try: self.swap_menu_item(self.pause_button, first_button)
+        except: pass
+        try: self.swap_menu_item(self.continue_button, first_button)
+        except: pass
 
         # update the menu buttons
         self.update_menu()
@@ -586,12 +593,12 @@ class Tomado(object):
         # check if the function is being triggered by a button
         if type(sender) == rumps.rumps.MenuItem:
             button_sound(self.prefs.get("allow_sound"))
+            # replace the start button to the pause button
+            self.swap_menu_item(self.start_button, self.pause_button)
         # define the timer length from preferences
         self.timer.end = self.prefs.get("{}_length".format(self.get_current_interval_type()))
         # start the timer
         self.timer.start()
-        # replace the start button to the pause button
-        self.swap_menu_item(self.start_button, self.pause_button)
         self.update_menu()
         # update the session info
         self.update_session_info()
