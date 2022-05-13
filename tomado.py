@@ -1,5 +1,4 @@
 ## HEADER
-#FIXME end session doesnt update session info correctly
 
 from subprocess import call
 import rumps
@@ -130,8 +129,6 @@ class Tomado(object):
         self.stats_today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
         self.stats_today_breakes.icon = self.config.get("break_symbol")
 
-        # create a session from the session_general
-        self.create_session()
 
         ## TIMER BUTTONS
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
@@ -145,7 +142,7 @@ class Tomado(object):
         # the reset_pomodoro button is created as a rumps.MenuItem, callback is the reset_timer method
         self.reset_button = rumps.MenuItem("Reset", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
-        ## MENUS
+        ## MENU
         self.menus = {"default_menu" : 
                 [self.start_button, 
                 self.reset_button,
@@ -180,6 +177,8 @@ class Tomado(object):
             }
         
         ## DEFAULT menu and state
+        # create a session from the session_general
+        self.create_session()
         # set the menu to the default (first button is Start)
         self.app.menu.update(self.menus.get("default_menu"))
         # set the menu to the right interval types
@@ -238,7 +237,7 @@ class Tomado(object):
         # update the session info
         self.update_session_info()
         # update todays stats
-        self.load_today_stats(sender="")
+        self.load_today_stats(sender=sender)
 
         if autostart and not new_session and sender != "startup":
             self.start_timer(sender="")
@@ -253,12 +252,14 @@ class Tomado(object):
 
     # updates timer control button titles with correct interval types
     def update_menu(self):
-        current_interval = self.get_current_interval_type()
-        self.start_button.title = "Start {}".format(current_interval.capitalize())
-        self.pause_button.title = "Pause {}".format(current_interval.capitalize())
-        self.continue_button.title = "Continue {}".format(current_interval.capitalize())
-        self.skip_button.title = "Skip {}".format(current_interval.capitalize())
-        self.reset_button.title = "Reset {}".format(current_interval.capitalize())
+        current_interval = self.get_current_interval_type().capitalize()
+        if current_interval == "Long":
+            current_interval = "Long Break"
+        self.start_button.title = "Start {}".format(current_interval)
+        self.pause_button.title = "Pause {}".format(current_interval)
+        self.continue_button.title = "Continue {}".format(current_interval)
+        self.skip_button.title = "Skip {}".format(current_interval)
+        self.reset_button.title = "Reset {}".format(current_interval)
 
     ## SESSION
     # returns the current interval TYPE from current_session dict
@@ -316,7 +317,8 @@ class Tomado(object):
 
     # ends and saves current session
     def end_session(self, sender):
-        button_sound(self.prefs.get("allow_sound"))
+        if type(sender) == rumps.rumps.MenuItem:
+            button_sound(self.prefs.get("allow_sound"))
         # stop the timer
         self.timer.stop()
         # save interval
@@ -352,9 +354,9 @@ class Tomado(object):
         self.loaded_state("end_session")
         # load todays stats from data
         self.load_today_stats(sender="")
-
     
     ## STATS
+    # saves a just ended interval to stats file, if it has a length of atleast 1
     def save_interval(self, save_interval, save_length):
         if save_length <= 0 or not save_length or save_length == None:
             return False
@@ -395,11 +397,12 @@ class Tomado(object):
         save_file(self.stats_path, stats)
         return True # created new week, new session and saved interval
 
-    # loads todays stats from stats file
+    # loads todays stats from stats file and displays them in the menu
     #TODO handle a interval saving in a later week than the start of a session
     #   handle a session being ended in a later week tha nthe start of a session
     #       -> do it by ending an unfinished session if current_session isnt in current_week
-    #       -> do it here, because it is triggered on starup and interacts with stats
+    #       -> do it here, because it is triggered on starup and interacts with stats (if startup)
+    #       -> maybe i can have unfinished sessions and it will by totally fine, idk, first lets figure out session_info
     def load_today_stats(self, sender):
         # reset the stats to zero
         self.pomodoros_today = 0
