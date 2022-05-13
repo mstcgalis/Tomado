@@ -65,15 +65,25 @@ def create_submenu(button_list, callback, type=""):
         submenu.append(button)
     return submenu
 
-# save the updated data to json
-#TODO docstring
 def save_file(file_path, data):
+    """saves data into a specified json file, creates one if it doesnt eist
+
+    Args:
+        file_path (string): the path of the file
+        data (dict, list, tuple, string, int, float, bool): the object to be saved
+    """
     with open(file_path, "w") as f:
         json.dump(data, f, indent=2)
 
-# open up stats json into data, which is then returned
-#TODO docstring
 def open_file(file_path):
+    """opens and parses a json file, which it then returns
+
+    Args:
+        file_path (string): the path of the file
+
+    Returns:
+        object: data form the file
+    """
     with open(file_path) as f:
         try: data = json.load(f)
         except: data = {}
