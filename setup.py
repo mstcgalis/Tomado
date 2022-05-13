@@ -1,3 +1,16 @@
+################################################################################
+# Title:    setup.py
+# Project:  Tomado
+# Author:   Daniel Gális
+#           danielgalis.com
+#           danielgalis21@gmail.com
+#           GitHub: @mstcgalis
+#           Discord: @danielmstc#2967
+# License:  GPL v3
+#
+# 2022
+################################################################################
+
 from setuptools import setup
 
 APP = ['Tomado.py']
