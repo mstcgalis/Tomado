@@ -398,11 +398,6 @@ class Tomado(object):
         return True # created new week, new session and saved interval
 
     # loads todays stats from stats file and displays them in the menu
-    #TODO handle a interval saving in a later week than the start of a session
-    #   handle a session being ended in a later week tha nthe start of a session
-    #       -> do it by ending an unfinished session if current_session isnt in current_week
-    #       -> do it here, because it is triggered on starup and interacts with stats (if startup)
-    #       -> maybe i can have unfinished sessions and it will by totally fine, idk, first lets figure out session_info
     def load_today_stats(self, sender):
         # reset the stats to zero
         self.pomodoros_today = 0
@@ -584,7 +579,6 @@ class Tomado(object):
         # load the next interval
         self.loaded_state("stop_timer")
 
-
     # pauses the interval
     def pause_timer(self, sender):
         button_sound(self.prefs.get("allow_sound"))
@@ -635,6 +629,7 @@ class Tomado(object):
         self.app.run()
     # quits this app
     def quit(self, sender):
+        self.end_session(sender="")
         rumps.quit_application(sender=None)
 
 ## RUN
