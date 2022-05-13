@@ -1,3 +1,14 @@
+################################################################################
+# Title:    utilities.py
+# Project:  Tomado
+# Author:   Daniel Gális
+#           danielgalis.com
+#           danielgalis21@gmail.com
+# License:  GPL v3
+#
+# 2022
+################################################################################
+
 from playsound import playsound
 import json
 import rumps

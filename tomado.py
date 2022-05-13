@@ -1,4 +1,13 @@
-## HEADER
+################################################################################
+# Title:    tomado.py
+# Project:  Tomado
+# Author:   Daniel Gális
+#           danielgalis.com
+#           danielgalis21@gmail.com
+# License:  GPL v3
+#
+# 2022
+################################################################################
 
 from subprocess import call
 import rumps
