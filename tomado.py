@@ -13,7 +13,6 @@
 
 from subprocess import call
 import rumps
-import json
 import time
 
 from utilities import *
