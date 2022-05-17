@@ -96,11 +96,6 @@ class Tomado(object):
         # if stats file doesnt exist, create it
         with open(self.stats_path, "a") as f:
             pass
-        # create stats variables
-        self.pomodoros_today = 0
-        self.pomodoro_time_today = 0
-        self.breakes_today = 0
-        self.breakes_time_today = 0
 
         ## GENERAL BUTTONS
         # non clickable button showing info about current session
@@ -243,7 +238,6 @@ class Tomado(object):
             first_button = self.pause_button
         else:
             first_button = self.start_button
-
 
         # set the first button to either Start or Pause
         try :self.swap_menu_item(self.start_button, first_button)
@@ -458,7 +452,7 @@ class Tomado(object):
                                 else:
                                     today_breakes_time += length
                                     today_breakes += 1
-        
+        # update the submenus
         self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(today_pomodoros, secs_to_time(today_pomodoros_time, hours=True))
         self.stats_today_breakes.title = "{} Breakes = {}".format(today_breakes, secs_to_time(today_breakes_time, hours=True))
         self.stats_week_pomodoros.title = "{} Pomodoros = {}".format(week_pomodoros, secs_to_time(week_pomodoros_time, hours=True))
