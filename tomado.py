@@ -9,6 +9,8 @@
 # License:  GPL v3
 #
 # 2022
+#
+# TODO: figure out if i want intervals to stop, when i lock the screen
 ################################################################################
 
 from subprocess import call
@@ -16,8 +18,6 @@ import rumps
 import time
 
 from utilities import *
-
-# FIXME: when a session is ended and autostart_pomodoros = true, first button is Start and should be Pause
 
 class Tomado(object):
     def __init__(self):
