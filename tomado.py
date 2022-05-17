@@ -192,20 +192,23 @@ class Tomado(object):
         
         ## DEFAULT menu and state
         # create a session from the session_general
-        self.create_session()
+        self.load_session()
         # set the menu to the default (first button is Start)
         self.app.menu.update(self.menus.get("default_menu"))
         # set the menu to the right interval types
         self.update_menu()
         # loaded state of timer
-        self.loaded_state("startup")
+        self.load_timer("startup")
         # display the right preferences (sound toggle, sound select, autostart toggles)
         self.startup_display_preferences()
     
     ## STATES AND MENUS
-    # sets the app to the default menu and resets timer
-    def loaded_state(self, sender):
+    def load_timer(self, sender):
+        """sets the menu to the correct state, loads next interval, starting it if autostart is True for current interval type
 
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         #stop the current timer
         self.timer.stop()
         #reset the current timer
@@ -254,16 +257,22 @@ class Tomado(object):
         if autostart and sender != "startup":
             self.start_timer(sender="")
     
-    # replaces a MenuItem with another MenuItem
     def swap_menu_item(self, original_item, new_item):
+        """swaps a MenuItem with another MenuItem in the menu
+
+        Args:
+            original_item (rumps.rumps.MenuItem): the item that will be replaced
+            new_item (rumps.rumps.MenuItem): the item that will take the original_item place
+        """
         original_item.title = original_item.title.split()[0]
         new_item.title = new_item.title.split()[0]
         self.app.menu.insert_after(original_item.title, new_item)
         self.app.menu.pop(original_item.title)
         self.update_menu()
 
-    # updates timer control button titles with correct interval types
     def update_menu(self):
+        """updates timer buttons (Start, Pause, Continue, Skip, Reset, Stop) with correct interval types (Pomodoro, Break, Long Break)
+        """
         current_interval = self.get_current_interval_type().capitalize()
         if current_interval == "Long":
             current_interval = "Long Break"
@@ -276,6 +285,14 @@ class Tomado(object):
     ## SESSION
     # returns the current interval TYPE from current_session dict
     def get_current_interval_type(self, full_text=False):
+        """returns the currently loaded interval type (pomodoro, break, long) of the current_session
+
+        Args:
+            full_text (bool, optional): If true, a string meant for the user will be returned. Defaults to False.
+
+        Returns:
+            string: type of loaded interval 
+        """
         # loop through the session, getting the interval key and the bool value
         for interval, value in self.session_current.items():
             # if the bool is False aka the interval has not been completed
@@ -291,8 +308,12 @@ class Tomado(object):
         # when the loop concludes without returning the function, it means there is no interval left in the session - return False
         return False
 
-    # returns current SPECIFIC interval from current_session dict
     def get_current_interval(self):
+        """returns currently loaded specific (indexed) interval of current_session
+
+        Returns:
+            string: indexed interval (type_i)
+        """
         # loop through the session, getting the interval key and the bool value
         for interval, value in self.session_current.items():
             # if the bool is False aka the interval has not been completed
@@ -300,8 +321,9 @@ class Tomado(object):
                 # return the first word of interval key (pomodoro/break/long)
                 return interval
     
-    # updates the session info
     def update_session_info(self):
+        """updates the session_info with correct symbols
+        """
         string = ""
         # loop through the items in session
         for interval, value in self.session_current.items():
@@ -322,13 +344,18 @@ class Tomado(object):
         # set the title of the session info to the string
         self.session_info.title = "Session: {}".format(string)
 
-    # creates a new session from self.session_general
-    def create_session(self):
+    def load_session(self):
+        """loads a new session from self.session_general
+        """
         for c, interval in enumerate(self.session_general):
             self.session_current["{}_{}".format(interval, c)] = False
 
-    # ends and saves current session
     def end_session(self, sender):
+        """ends the current session, saving the current interval and loading the new session
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         if type(sender) == rumps.rumps.MenuItem:
             button_sound(self.prefs.get("allow_sound"))
         # stop the timer
@@ -359,17 +386,25 @@ class Tomado(object):
         save_file(self.stats_path, stats)
 
         self.session_current.clear()
-        self.create_session()
+        self.load_session()
 
         # load the next interval
         if sender != "loaded_state":
-            self.loaded_state("end_session")
+            self.load_timer("end_session")
         # load todays stats from data
         self.load_stats(sender="")
     
     ## STATS
-    # saves a just ended interval to stats file, if it has a length of atleast 1
     def save_interval(self, save_interval, save_length):
+        """saves a just ended interval to the stats file, if it has a length of atleast 1
+
+        Args:
+            save_interval (string): type of interval
+            save_length (int): length of interval in seconds
+
+        Returns:
+            bool: True if interval was saved
+        """
         if save_length <= 0 or not save_length or save_length == None:
             return False
 
@@ -409,8 +444,12 @@ class Tomado(object):
         save_file(self.stats_path, stats)
         return True # created new week, new session and saved interval
 
-    # loads stats from stats file and displays them in the menu
     def load_stats(self, sender):
+        """loads stats from stats file and displays them in the menu (daily and weekly)
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         # daily stat vars
         today_pomodoros = 0
         today_pomodoros_time = 0
@@ -456,8 +495,9 @@ class Tomado(object):
         self.stats_week_breakes.title = "{} Breakes = {}".format(week_breakes, secs_to_time(week_breakes_time, hours=True))
 
     ## PREFERENCES
-    # method to display correct preferences on start up
     def startup_display_preferences(self):
+        """displays correct preferences (from prefs file) on start up
+        """
         # AUTOSTART
         if self.prefs.get("autostart_pomodoro"):
             self.autostart_pomodoro_button.state = 1
@@ -488,8 +528,12 @@ class Tomado(object):
                 # make the button active
                 option.state = 1
     
-    # toggles autostart
     def autostart_toggle(self, sender):
+        """toggles the autostart (of Pomodoros or Breaks) and saves it to the preferences file
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         #change the preferences value to the other bool
         self.prefs["autostart_{}".format(sender.type)] = not self.prefs["autostart_{}".format(sender.type)]
         #change the state to the other one
@@ -499,8 +543,12 @@ class Tomado(object):
             sender.state = 0
         save_file(self.prefs_path, self.prefs)
 
-    # changes the length of an interval
     def change_length(self, sender):
+        """changes the length of an interval (Pomodoro, Break, Long Break) and saves it to the preferences file
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         # change the interval length value in prefs
         self.prefs["{}_length".format(sender.type)] = int(sender.title.split()[0]) * 60
         
@@ -526,8 +574,12 @@ class Tomado(object):
         save_file(self.prefs_path, self.prefs)
 
     ## SOUNDS
-    # change the timer sound
     def change_sound(self, sender):
+        """changes the sound that notifies the user at the end of the interval
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         self.prefs["timer_sound"] = "sounds/" + sender.title.lower() + ".mp3"
         sender.state = 1
         for sound in self.sound_options:
@@ -535,8 +587,12 @@ class Tomado(object):
                 sound.state = 0
         save_file(self.prefs_path, self.prefs)
 
-    # toggle sounds
     def sounds_toggle(self, sender):
+        """toggles (on/off) sounds of the app
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         # change the preferences value to the other bool
         self.prefs["allow_sound"] = not self.prefs["allow_sound"]
         # change the state to the other one
@@ -547,8 +603,12 @@ class Tomado(object):
         save_file(self.prefs_path, self.prefs)
     
     ## NOTIFICATIONS
-    # interval notification
-    def notification(self, type):
+    def interval_notification(self, type):
+        """notifies the user when interval ends, depending on the type
+
+        Args:
+            type (string): interval type pomodoro/break/long
+        """
         rumps.notification(
                 title=self.config["app_name"],
                 subtitle="",
@@ -557,8 +617,9 @@ class Tomado(object):
         if self.prefs.get("allow_sound"):
             playsound(self.prefs.get("timer_sound"))
 
-    # not clickable notification
     def not_clickable_notification(self):
+        """notidies the user when a non clickable MenuItem is pressed
+        """
         rumps.notification(
                 title=self.config["app_name"],
                 subtitle="",
@@ -566,8 +627,12 @@ class Tomado(object):
                 sound=False)
 
     ## TIMER
-    # triggered every second
     def tick(self, sender):
+        """triggeres every second, moves the timer
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         # add one to the counter
         sender.count += 1
         # calculate the remaining time from the counter and the end
@@ -580,8 +645,12 @@ class Tomado(object):
             # stop the timer
             self.stop_timer()
 
-    # starts the timer (also button triggered)
     def start_timer(self, sender):
+        """starts the interval
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         # check if the function is being triggered by a button
         if type(sender) == rumps.rumps.MenuItem:
             button_sound(self.prefs.get("allow_sound"))
@@ -593,44 +662,61 @@ class Tomado(object):
         self.timer.start()
         self.update_session_info()
     
-    # stops the timer
     def stop_timer(self):
+        """stops the loaded interval
+        """
         # stop the timer
         self.timer.stop()
         self.timer.end = 0
         # notify the user according to the current timer type
-        self.notification(self.get_current_interval_type())
+        self.interval_notification(self.get_current_interval_type())
         # save interval
         self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
         # set the just passed interval to the time it has elapsed
         self.session_current[self.get_current_interval()] = self.timer.count - 1
         # load the next interval
-        self.loaded_state("stop_timer")
+        self.load_timer("stop_timer")
 
-    # pauses the interval
     def pause_timer(self, sender):
+        """pauses the loaded interval
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         button_sound(self.prefs.get("allow_sound"))
         # stop the timer
         self.timer.stop()
         # swap the pause_button for the continue button
         self.swap_menu_item(self.pause_button, self.continue_button)
 
-    # continues the interval
     def continue_timer(self, sender):
+        """continues the loaded interval
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         button_sound(self.prefs.get("allow_sound"))
         # starts the timer
         self.timer.start()
         # replaces the continue button with the pause button
         self.swap_menu_item(self.continue_button, self.pause_button)
     
-    # resets the interval
     def reset_timer(self, sender):
+        """resets the loaded interval
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         button_sound(self.prefs.get("allow_sound"))
         # load the next interval
-        self.loaded_state("reset_timer")
+        self.load_timer("reset_timer")
 
-    # skips the interval
     def skip_timer(self, sender):
+        """skips the loaded interval
+
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
         button_sound(self.prefs.get("allow_sound"))
         # save interval
         self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
@@ -641,22 +727,27 @@ class Tomado(object):
             # set the just passed interval to the time it has elapsed
             self.session_current[self.get_current_interval()] = self.timer.count - 1
         # load the next interval
-        self.loaded_state("skip_timer")
+        self.load_timer("skip_timer")
     
-    # shows info about the app
     def about_info(self, sender):
-        rumps.alert("About Tomado", "made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n2022\nGPL-3.0 License")
+        """shows info about the app
 
-    # not clickable
-    def not_clickable(self, sender):
-        self.not_clickable_notification()
+        Args:
+            sender (string, MenuItem): information on the sender
+        """
+        rumps.alert("About Tomado", "made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n2022\nGPL-3.0 License")
     
     ## APP
-    # runs this app
     def run(self):
+        """runs the app
+        """
         self.app.run()
-    # quits this app
     def quit(self, sender):
+        """quits the app, ending the loaded session
+
+        Args:
+            sender (_type_): _description_
+        """
         self.end_session(sender="")
         rumps.quit_application(sender=None)
 
