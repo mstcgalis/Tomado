@@ -339,9 +339,8 @@ class Tomado(object):
         self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
 
         # open the data dictionary from json
-        with open(self.stats_path) as f:
-            try: stats = json.load(f)
-            except: stats = {}
+        stats = {}
+        open_file(self.stats_path, stats)
 
         # adds end time to current session
         current_week = time.strftime("%Y_%W", time.localtime(time.time()))
