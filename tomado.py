@@ -132,14 +132,19 @@ class Tomado(object):
         self.sound_preferences_button = rumps.MenuItem("Timer Sound")
         self.sound_options = create_submenu(self.config.get("sound_options"), self.change_sound)
         
-        # stats today submenu
-        self.today_stats_submenu = rumps.MenuItem("Today's Stats")
-        # shows pomodoros tracked today
+        # stats submenus
+        self.stats_today_submenu = rumps.MenuItem("Daily Stats")
+        self.stats_week_submenu = rumps.MenuItem("Weekly Stats")
+        # shows pomodoros tracked today / this week
         self.stats_today_pomodoros = rumps.MenuItem("Pomodoros:", callback=self.not_clickable)
         self.stats_today_pomodoros.icon = self.config.get("pomodoro_symbol")
-        # shows breakes tracked today
+        self.stats_week_pomodoros = rumps.MenuItem("Pomodoros:", callback=self.not_clickable)
+        self.stats_week_pomodoros.icon = self.config.get("pomodoro_symbol")
+        # shows breakes tracked today / this week
         self.stats_today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
         self.stats_today_breakes.icon = self.config.get("break_symbol")
+        self.stats_week_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable)
+        self.stats_week_breakes.icon = self.config.get("break_symbol")
 
 
         ## TIMER BUTTONS
@@ -163,9 +168,12 @@ class Tomado(object):
                 self.session_info,
                 self.end_session_button,
                 None,
-                [self.today_stats_submenu, 
+                [self.stats_today_submenu, 
                     [self.stats_today_pomodoros,
                     self.stats_today_breakes]],
+                [self.stats_week_submenu, 
+                    [self.stats_week_pomodoros,
+                    self.stats_week_breakes]],
                 None,
                 [self.prefereces_button, 
                     [[self.pomodoro_length_button, 
