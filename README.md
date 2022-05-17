@@ -30,7 +30,7 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 ## Roadmap
 
 - Decide how to treat the screen getting locked while an interval is active and implement
-- Todo intergration with list.app and maybe third party software (Notion, Trelo?...)
+- Todo intergration with [list.app](https://www.are.na/daniel-galis/self-governance) and maybe third party software (Notion, Trelo?...)
 ---
 
 made with ❤️, care and patience by [Daniel Gális](www.danielgalis.com)
