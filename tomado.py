@@ -15,7 +15,6 @@ from subprocess import call
 import rumps
 import json
 import time
-import Quartz
 
 from utilities import *
 
