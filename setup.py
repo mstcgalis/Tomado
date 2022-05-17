@@ -1,3 +1,16 @@
+################################################################################
+# Title:    setup.py
+# Project:  Tomado
+# Author:   Daniel Gális
+#           danielgalis.com
+#           danielgalis21@gmail.com
+#           GitHub: @mstcgalis
+#           Discord: @danielmstc#2967
+# License:  GPL v3
+#
+# 2022
+################################################################################
+
 from setuptools import setup
 
 APP = ['Tomado.py']
@@ -13,6 +26,7 @@ OPTIONS = {
 
 setup(
     app=APP,
+    version="0.2.0-alpha",
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
