@@ -27,6 +27,10 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 6. Go to `System Preferences -> Security & Privacy -> General -> click "Open Anyway"`
 7. Thanks for installing! 😊 Don't forget to enable notifications
 
+## Roadmap
+
+- Decide how to treat the screen getting locked while an interval is active and implement
+- Todo intergration with list.app and maybe third party software (Notion, Trelo?...)
 ---
 
 made with ❤️, care and patience by [Daniel Gális](www.danielgalis.com)
