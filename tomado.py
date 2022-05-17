@@ -19,6 +19,7 @@ import Quartz
 
 from utilities import *
 
+# FIXME: when a session is ended and autostart_pomodoros = true, first button is Start and should be Pause
 
 class Tomado(object):
     def __init__(self):
@@ -257,7 +258,7 @@ class Tomado(object):
         # update the session info
         self.update_session_info()
         # update todays stats
-        self.load_today_stats(sender=sender)
+        self.load_stats(sender=sender)
 
         if autostart and not new_session and sender != "startup":
             self.start_timer(sender="")
@@ -373,7 +374,7 @@ class Tomado(object):
         # load the next interval
         self.loaded_state("end_session")
         # load todays stats from data
-        self.load_today_stats(sender="")
+        self.load_stats(sender="")
     
     ## STATS
     # saves a just ended interval to stats file, if it has a length of atleast 1
@@ -417,13 +418,18 @@ class Tomado(object):
         save_file(self.stats_path, stats)
         return True # created new week, new session and saved interval
 
-    # loads todays stats from stats file and displays them in the menu
-    def load_today_stats(self, sender):
-        # reset the stats to zero
-        self.pomodoros_today = 0
-        self.pomodoro_time_today = 0
-        self.breakes_today = 0
-        self.breakes_time_today = 0
+    # loads stats from stats file and displays them in the menu
+    def load_stats(self, sender):
+        # daily stat vars
+        today_pomodoros = 0
+        today_pomodoros_time = 0
+        today_breakes = 0
+        today_breakes_time = 0
+        # weekly stat vars
+        week_pomodoros = 0
+        week_pomodoros_time = 0
+        week_breakes = 0
+        week_breakes_time = 0
         
         stats = open_file(self.stats_path)
 
@@ -433,19 +439,30 @@ class Tomado(object):
         for week, sessions in stats.items():
             if week == current_week:
                 for session, intervals in sessions.items():
+                    # get weekly stats
+                    for interval, length in intervals.items():
+                        if interval.split("_")[0] == "pomodoro":
+                            week_pomodoros_time += length
+                            week_pomodoros += 1
+                        else:
+                            week_breakes_time += length
+                            week_breakes += 1
+                    # get daily stats
                     # if start_time of unfinished, start_time of finished, or end_time of finished sessions is today
                     if session.split("_")[0] == current_date or session.split("-")[1].split("_")[0] == current_date or session.split("-")[1].split("_")[0] == current_date:
                         for interval, length in intervals.items():
                             if interval.split("_")[1] == current_date:
                                 if interval.split("_")[0] == "pomodoro":
-                                    self.pomodoro_time_today += length
-                                    self.pomodoros_today += 1
+                                    today_pomodoros_time += length
+                                    today_pomodoros += 1
                                 else:
-                                    self.breakes_time_today += length
-                                    self.breakes_today += 1
+                                    today_breakes_time += length
+                                    today_breakes += 1
         
-        self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(self.pomodoros_today, secs_to_time(self.pomodoro_time_today, hours=True))
-        self.stats_today_breakes.title = "{} Breakes = {}".format(self.breakes_today, secs_to_time(self.breakes_time_today, hours=True))
+        self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(today_pomodoros, secs_to_time(today_pomodoros_time, hours=True))
+        self.stats_today_breakes.title = "{} Breakes = {}".format(today_breakes, secs_to_time(today_breakes_time, hours=True))
+        self.stats_week_pomodoros.title = "{} Pomodoros = {}".format(week_pomodoros, secs_to_time(week_pomodoros_time, hours=True))
+        self.stats_week_breakes.title = "{} Breakes = {}".format(week_breakes, secs_to_time(week_breakes_time, hours=True))
 
     ## PREFERENCES
     # method to display correct preferences on start up
