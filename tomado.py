@@ -149,7 +149,7 @@ class Tomado(object):
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.continue_button = rumps.MenuItem("Continue", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
         # the skip_pomodoro button is created as a rumps.MenuItem, callback is the skip_timer method
-        self.skip_button = rumps.MenuItem("Skip", callback=self.skip_timer, key="r", icon="icons/skip.png", template=True)
+        self.skip_button = rumps.MenuItem("Skip", callback=self.skip_timer, key="k", icon="icons/skip.png", template=True)
         # the reset_pomodoro button is created as a rumps.MenuItem, callback is the reset_timer method
         self.reset_button = rumps.MenuItem("Reset", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
@@ -214,25 +214,23 @@ class Tomado(object):
         autostart = False
         if self.prefs.get("autostart_pomodoro") == True and self.get_current_interval_type() == "pomodoro":
             autostart = True
+        if self.prefs.get("autostart_pomodoro") == True and self.get_current_interval_type() == False:
+            autostart = True
         if self.prefs.get("autostart_break") == True and self.get_current_interval_type() == "break":
             autostart = True
         if self.prefs.get("autostart_break") == True and self.get_current_interval_type() == "long":
             autostart = True
 
-        # variable representing whether a new session has been started
-        new_session = False
         # check wheter the session is not over aka there is not a bool value in session
         if self.get_current_interval_type() == False:
             #if it is over, trigger a method for ending a session
             self.end_session(sender="loaded_state")
-            #save the info about a new session starting to a variable
-            new_session = True
 
         # change the title to the current interval
         self.app.title = secs_to_time(self.prefs.get("{}_length".format(self.get_current_interval_type())))
         self.app.icon = self.config.get("{}_symbol".format(self.get_current_interval_type())) 
 
-        if autostart and not new_session and sender != "startup":
+        if autostart and sender != "startup":
             first_button = self.pause_button
         else:
             first_button = self.start_button
@@ -252,7 +250,8 @@ class Tomado(object):
         # update todays stats
         self.load_stats(sender=sender)
 
-        if autostart and not new_session and sender != "startup":
+        print("hello")
+        if autostart and sender != "startup":
             self.start_timer(sender="")
     
     # replaces a MenuItem with another MenuItem
@@ -339,7 +338,7 @@ class Tomado(object):
 
         # open the data dictionary from json
         stats = {}
-        open_file(self.stats_path, stats)
+        stats = open_file(self.stats_path)
 
         # adds end time to current session
         current_week = time.strftime("%Y_%W", time.localtime(time.time()))
@@ -363,7 +362,8 @@ class Tomado(object):
         self.create_session()
 
         # load the next interval
-        self.loaded_state("end_session")
+        if sender != "loaded_state":
+            self.loaded_state("end_session")
         # load todays stats from data
         self.load_stats(sender="")
     
