@@ -126,3 +126,4 @@ dmypy.json
 
 # dmg creatation process
 create_dmg.txt
+*.dmg
