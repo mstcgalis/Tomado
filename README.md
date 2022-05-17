@@ -3,7 +3,7 @@ Simple Pomodoro Timer that lives in your MacOS menu bar 💻
 
 Please create a Pull Request or Issue if you encounter an error. I'm also always open to talk 🌱
 
-## Installation - easy way (from released binary)
+## Installation - easy way
 
 1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.1.0-alpha)
 2. Mount the `.dmg` and move `Tomado.app` to `Applications`
