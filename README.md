@@ -1,4 +1,4 @@
-# Tomado 🍅<img width="238" alt="Screenshot 2022-05-19 at 11 21 49" src="https://user-images.githubusercontent.com/77400726/169260047-a33931a1-f4f4-4d6a-b253-2ca2b8f92d3a.png">
+# Tomado 🍅
 
 Simple Pomodoro Timer that lives in your MacOS menu bar 💻
 <img width="238" alt="Screenshot 2022-05-19 at 11 21 49" src="https://user-images.githubusercontent.com/77400726/169260047-a33931a1-f4f4-4d6a-b253-2ca2b8f92d3a.png">
