@@ -8,4 +8,4 @@ create-dmg \
   --hide-extension "Tomado.app" \
   --app-drop-link 300 100 \
   "Tomado-Installer.dmg" \
-  "/Users/admin/Desktop/tomado/Tomado/dist"
+  "/Users/admin/Desktop/tomado/Tomado/Tomado/dist"
