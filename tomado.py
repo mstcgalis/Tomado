@@ -11,7 +11,7 @@
 # 2022
 #
 # TODO: figure out if i want intervals to stop, when i lock the screen
-# TODO: autostart session option
+# TODO: prefs loading across versions
 ################################################################################
 
 from subprocess import call
@@ -74,7 +74,7 @@ class Tomado(object):
         # settings that can be user defined
         # default prefs
         self.default_prefs = {
-            "version": "v0.2.1-alpha",
+            "version": "{}".format(self.config.get("version")),
             "pomodoro_length": 1500,
             "break_length": 300,
             "long_length": 900,
@@ -88,9 +88,15 @@ class Tomado(object):
         self.prefs_path = str(self.folder + "/prefs.json")
         # open prefs from file
         self.prefs = open_file(self.prefs_path)
-        # if it is empty (file didnt exist) or the version doesnt match, use default prefs
-        if not bool(self.prefs) or self.prefs.get("version") != self.config.get("version"):
+        # if it is empty (file didnt exist) use default prefs
+        if not bool(self.prefs):
             self.prefs = self.default_prefs    
+            save_file(self.prefs_path, self.prefs)
+        # if the version doesnt match, use the saved preferences where possible
+        if self.prefs.get("version") != self.config.get("version"):
+            print("hello")
+            self.prefs = prefs_update(self.prefs, self.default_prefs)
+            save_file(self.prefs_path, self.prefs)
         
         ## STATS
         # path to the stats file
@@ -747,7 +753,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        rumps.alert("About Tomado", "made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n2022\nGPL-3.0 License")
+        rumps.alert("About Tomado", "made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n{}\n2022\nGPL-3.0 License".format(self.config.get("version")))
     
     ## APP
     def run(self):

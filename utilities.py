@@ -88,3 +88,10 @@ def open_file(file_path):
         try: data = json.load(f)
         except: data = {}
     return data
+
+def prefs_update(prefs_og, prefs_new):
+    for pref, value in prefs_new.items():
+        if pref not in prefs_og:
+            prefs_og["{}".format(pref)] = value
+    prefs_og["version"] = prefs_new.get("version")
+    return prefs_og
