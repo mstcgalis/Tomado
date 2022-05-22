@@ -1,5 +1,5 @@
 create-dmg \
-  --volname "Tomado Installer" \
+  --volname "Tomado Installer v0.2.1-alpha" \
   --volicon "/Users/admin/Desktop/tomado/Tomado/icons/tomado.icns" \
   --window-pos 100 60 \
   --window-size 430 270 \
@@ -7,5 +7,5 @@ create-dmg \
   --icon "Tomado.app" 100 100 \
   --hide-extension "Tomado.app" \
   --app-drop-link 300 100 \
-  "Tomado-Installer.dmg" \
+  "Tomado-Installer-v0.2.1-alpha.dmg" \
   "/Users/admin/Desktop/tomado/Tomado/Tomado/dist"
