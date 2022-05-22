@@ -24,7 +24,7 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 ## Installation - from source code
 
 1. Clone the repository: ```$ git clone https://github.com/mstcgalis/Tomado.git```
-2. Build the executable: ```$ python setup.py py2app```
+2. Build the executable: ```$ make app```
 3. The app will be at `dist/Tomado`, but you can move it wherever
 5. Open `Tomado`
 6. Go to `System Preferences -> Security & Privacy -> General -> click "Open Anyway"`
