@@ -90,6 +90,15 @@ def open_file(file_path):
     return data
 
 def prefs_update(prefs_og, prefs_new):
+    """updates the prefs saved by user to be compatible with a new version, keeping the user selected values
+
+    Args:
+        prefs_og (dict): the user saved prefs
+        prefs_new (dict): the default prefs for the new version
+
+    Returns:
+        dict: the updated preferences
+    """
     for pref, value in prefs_new.items():
         if pref not in prefs_og:
             prefs_og["{}".format(pref)] = value

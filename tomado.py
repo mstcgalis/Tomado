@@ -11,7 +11,6 @@
 # 2022
 #
 # TODO: figure out if i want intervals to stop, when i lock the screen
-# TODO: prefs loading across versions
 ################################################################################
 
 from subprocess import call
@@ -80,7 +79,7 @@ class Tomado(object):
             "long_length": 900,
             "autostart_pomodoro": True,
             "autostart_break": True,
-            "autostart_session": True,
+            "autostart_session": False,
             "allow_sound": True,
             "timer_sound": "sounds/beep.mp3"
         }
