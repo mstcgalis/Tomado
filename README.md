@@ -36,6 +36,6 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 - Todo intergration with [list.app](https://www.are.na/daniel-galis/self-governance) and maybe third party software (Notion, Trello?...)
 ---
 
-made with ❤️, care and patience by [Daniel Gális](www.danielgalis.com)
+made with ❤️, care and patience by [Daniel Gális](https://www.are.na/daniel-galis)
 
 part of [self.governance(software)](https://www.are.na/daniel-galis/self-governance)
