@@ -103,6 +103,8 @@ class Tomado(object):
         # if stats file doesnt exist, create it
         with open(self.stats_path, "a") as f:
             pass
+        # variable storing the date and time at which the curretn interval started
+        self.interval_start = 0
 
         ## GENERAL BUTTONS
         # non clickable button showing info about current session
@@ -427,6 +429,11 @@ class Tomado(object):
         current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
         current_time = time.strftime("%H:%M%:%S", time.localtime(time.time()))
 
+        # if the interval didnt start today, save it to the day it started
+        if self.interval_start != current_date:
+            current_date = self.interval_start
+            current_time = "00:00:00"
+
         for week, sessions in stats.items():
             if week == current_week:
                 for session, intervals in sessions.items():
@@ -678,6 +685,9 @@ class Tomado(object):
         # start the timer
         self.timer.start()
         self.update_session_info()
+
+        # change the interval start var to the current date
+        self.interval_start = time.strftime("%m.%d%.", time.localtime(time.time()))
     
     def stop_timer(self):
         """stops the loaded interval
