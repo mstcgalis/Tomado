@@ -15,7 +15,7 @@ dmg:
 	--icon "Tomado.app" 100 100 \
 	--hide-extension "Tomado.app" \
 	--app-drop-link 300 100 \
-	"Tomado-Installer-$(VERSION)-alpha.dmg" \
+	"Tomado-Installer-$(VERSION).dmg" \
 	"/Users/admin/Desktop/tomado/Tomado/Tomado/dist"
 
 .PHONY: clean
