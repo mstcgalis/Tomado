@@ -3,7 +3,7 @@ VERSION = v0.2.1-alpha
 make all: app dmg
 
 app:
-	python3 setup.py py2app
+	python setup.py py2app
 
 dmg:
 	create-dmg \

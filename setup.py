@@ -26,7 +26,7 @@ OPTIONS = {
 
 setup(
     app=APP,
-    version="0.2.1-alpha",
+    version="0.2.1a",
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
