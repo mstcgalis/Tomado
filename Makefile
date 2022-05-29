@@ -22,4 +22,4 @@ dmg:
 
 clean:
 	rm -rf build dist
-	rm *.dmg
+	rm -rf *.dmg
