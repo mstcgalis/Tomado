@@ -11,6 +11,7 @@
 # 2022
 #
 # TODO: figure out if i want intervals to stop, when i lock the screen
+# TODO: switch to pyinstaller
 ################################################################################
 
 from subprocess import call

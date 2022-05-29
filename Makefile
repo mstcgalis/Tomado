@@ -3,7 +3,9 @@ VERSION = v0.2.1-alpha
 make all: app dmg
 
 app:
-	python setup.py py2app
+	pyinstaller --noconfirm --log-level=WARN \
+	--onedir --windowed \
+	tomado.spec
 
 dmg:
 	create-dmg \
