@@ -1,4 +1,8 @@
+altgraph==0.17.2
+macholib==1.16
+modulegraph==0.19.2
 playsound==1.3.0
+py2app==0.28.2
 pyobjc-core==8.5
 pyobjc-framework-Cocoa==8.5
 rumps==0.3.0
