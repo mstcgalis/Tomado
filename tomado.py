@@ -11,14 +11,7 @@
 # 2022
 #
 # TODO: figure out if i want intervals to stop, when i lock the screen
-# FIXME: not working on tereza
-#       its not dependant on the env
-#       i dont think it has anything to do with the python executable, since it produces the same error even on the working version
-#       test: installing python3 on terezea
-#       test: different version od tomado.py
-#       test: not importing utilities
-#
-#       atelier mac 12.3.1. - works, throws the same error when lauching python executable
+# FIXME: autostart session doesnt work when End Session is pressed
 #		
 #
 #
