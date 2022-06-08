@@ -17,6 +17,11 @@
 #       test: installing python3 on terezea
 #       test: different version od tomado.py
 #       test: not importing utilities
+#
+#       atelier mac 12.3.1. - works, throws the same error when lauching python executable
+#		
+#
+#
 ################################################################################
 
 from subprocess import call
@@ -505,15 +510,18 @@ class Tomado(object):
                             week_breakes += 1
                     # get daily stats
                     # if start_time of unfinished, start_time of finished, or end_time of finished sessions is today
-                    if session.split("_")[0] == current_date or session.split("-")[1].split("_")[0] == current_date or session.split("-")[1].split("_")[0] == current_date:
-                        for interval, length in intervals.items():
-                            if interval.split("_")[1] == current_date:
-                                if interval.split("_")[0] == "pomodoro":
-                                    today_pomodoros_time += length
-                                    today_pomodoros += 1
-                                else:
-                                    today_breakes_time += length
-                                    today_breakes += 1
+                    session_date = ""
+                    for i in session.split("-"):
+                        session_date = i.split("_")[0]
+                        if session_date == current_date:
+                            for interval, length in intervals.items():
+                                if interval.split("_")[1] == current_date:
+                                    if interval.split("_")[0] == "pomodoro":
+                                        today_pomodoros_time += length
+                                        today_pomodoros += 1
+                                    else:
+                                        today_breakes_time += length
+                                        today_breakes += 1
         # update the submenus
         self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(today_pomodoros, secs_to_time(today_pomodoros_time, hours=True))
         self.stats_today_breakes.title = "{} Breakes = {}".format(today_breakes, secs_to_time(today_breakes_time, hours=True))
