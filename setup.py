@@ -14,6 +14,7 @@
 from setuptools import setup
 
 APP = ['Tomado.py']
+VERSION = "0.2.2a"
 DATA_FILES = ["icons/tomado.icns", 'icons', 'sounds']
 OPTIONS = {
     'argv_emulation': True,
@@ -26,7 +27,7 @@ OPTIONS = {
 
 setup(
     app=APP,
-    version="0.2.1a",
+    version=VERSION,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
