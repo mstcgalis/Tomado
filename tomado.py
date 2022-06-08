@@ -11,19 +11,12 @@
 # 2022
 #
 # TODO: figure out if i want intervals to stop, when i lock the screen
-# FIXME: not working on tereza
-#       its not dependant on the env
-#       i dont think it has anything to do with the python executable, since it produces the same error even on the working version
-#       test: installing python3 on terezea
-#       test: different version od tomado.py
-#       test: not importing utilities
-#
-#       atelier mac 12.3.1. - works, throws the same error when lauching python executable
 #		
 #
 #
 ################################################################################
 
+from enum import auto
 from subprocess import call
 import rumps
 import time
@@ -241,14 +234,17 @@ class Tomado(object):
         self.timer.count = 0
 
         autostart = False
-        if self.prefs.get("autostart_pomodoro") and self.get_current_interval_type() == "pomodoro":
-            autostart = True
-        if self.prefs.get("autostart_break") and self.get_current_interval_type() == "break":
-            autostart = True
-        if self.prefs.get("autostart_break") and self.get_current_interval_type() == "long":
-            autostart = True
-        if self.prefs.get("autostart_session"): #and self.get_current_interval_type() == False:
-            autostart = True
+        if sender == "end_session":
+            autostart = self.prefs.get("autostart_session")
+        else:
+            if self.prefs.get("autostart_pomodoro") and self.get_current_interval_type() == "pomodoro":
+                autostart = True
+            if self.prefs.get("autostart_break") and self.get_current_interval_type() == "break":
+                autostart = True
+            if self.prefs.get("autostart_break") and self.get_current_interval_type() == "long":
+                autostart = True
+            if self.prefs.get("autostart_session") and not self.get_current_interval_type():
+                autostart = True
 
         # check wheter the session is not over aka there is not a bool value in session
         if self.get_current_interval_type() == False:
