@@ -11,12 +11,12 @@
 # 2022
 #
 # TODO: figure out if i want intervals to stop, when i lock the screen
-# FIXME: autostart session doesnt work when End Session is pressed
 #		
 #
 #
 ################################################################################
 
+from enum import auto
 from subprocess import call
 import rumps
 import time
@@ -234,14 +234,17 @@ class Tomado(object):
         self.timer.count = 0
 
         autostart = False
-        if self.prefs.get("autostart_pomodoro") and self.get_current_interval_type() == "pomodoro":
-            autostart = True
-        if self.prefs.get("autostart_break") and self.get_current_interval_type() == "break":
-            autostart = True
-        if self.prefs.get("autostart_break") and self.get_current_interval_type() == "long":
-            autostart = True
-        if self.prefs.get("autostart_session"): #and self.get_current_interval_type() == False:
-            autostart = True
+        if sender == "end_session":
+            autostart = self.prefs.get("autostart_session")
+        else:
+            if self.prefs.get("autostart_pomodoro") and self.get_current_interval_type() == "pomodoro":
+                autostart = True
+            if self.prefs.get("autostart_break") and self.get_current_interval_type() == "break":
+                autostart = True
+            if self.prefs.get("autostart_break") and self.get_current_interval_type() == "long":
+                autostart = True
+            if self.prefs.get("autostart_session") and not self.get_current_interval_type():
+                autostart = True
 
         # check wheter the session is not over aka there is not a bool value in session
         if self.get_current_interval_type() == False:
