@@ -23,13 +23,14 @@ import time
 
 from utilities import *
 
+__version__ = "0.2.2-alpha"
+
 class Tomado(object):
     def __init__(self):
         ## CONFIG
         # settings that cant't be user defined for now
         self.config = {
             "app_name" : "Tomado",
-            "version" : "v0.2.1-alpha",
             "pomodoro_message": "Pomodoro is over. Take a break! 🪴",
             "break_message": "Break has concluded. Time to focus! 🍅",
             "long_message": "Session is finished. Good job! 🌻",
@@ -772,7 +773,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        rumps.alert("About Tomado", "made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n{}\n2022\nGPL-3.0 License".format(self.config.get("version")))
+        rumps.alert("About Tomado", "made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n{}\n2022\nGPL-3.0 License".format(__version__))
     
     ## APP
     def run(self):
