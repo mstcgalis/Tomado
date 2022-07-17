@@ -103,8 +103,9 @@ class Tomado(object):
             save_file(self.prefs_path, self.prefs)
         
         ## STATS
-        # path to the stats file
-        self.stats_path = str(self.folder + '/stats.json')
+        # path to the stats file FIXME
+        # self.stats_path = str(self.folder + '/stats.json')
+        self.stats_path = str('testfiles/stats.json')
         # if stats file doesnt exist, create it
         with open(self.stats_path, "a") as f:
             pass
