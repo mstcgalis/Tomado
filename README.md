@@ -32,7 +32,6 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 
 ## Roadmap
 
-- Decide how to treat the screen getting locked while an interval is active and implement the solution
 - Todo intergration with [list.app](https://www.are.na/daniel-galis/self-governance) and maybe third party software (Notion, Trello?...)
 ---
 
