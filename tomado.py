@@ -11,7 +11,7 @@
 # 2022
 #
 # TODO: figure out if i want intervals to stop, when i lock the screen
-#		
+# TODO: quiet mode
 #
 #
 ################################################################################
