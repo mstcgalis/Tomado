@@ -98,14 +98,14 @@ class Tomado(object):
             save_file(self.prefs_path, self.prefs)
         # if the version doesnt match, use the saved preferences where possible
         if self.prefs.get("version") != self.config.get("version"):
-            print("hello")
             self.prefs = prefs_update(self.prefs, self.default_prefs)
             save_file(self.prefs_path, self.prefs)
         
         ## STATS
         # path to the stats file FIXME
-        # self.stats_path = str(self.folder + '/stats.json')
-        self.stats_path = str('testfiles/stats.json')
+        self.stats_path = str(self.folder + '/stats.json')
+        # for test purposes use: 
+        #   self.stats_path = str('testfiles/stats.json')
         # if stats file doesnt exist, create it
         with open(self.stats_path, "a") as f:
             pass
