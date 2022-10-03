@@ -16,10 +16,10 @@
 #
 ################################################################################
 
-from enum import auto
-from subprocess import call
 import rumps
 import time
+
+from just_playback import Playback
 
 from utilities import *
 
@@ -100,6 +100,9 @@ class Tomado(object):
         if self.prefs.get("version") != self.config.get("version"):
             self.prefs = prefs_update(self.prefs, self.default_prefs)
             save_file(self.prefs_path, self.prefs)
+        # setting up the playback object for notification sounds
+        self.notification_playback = Playback() # creates an object for managing playback of a single audio file
+        self.notification_playback.load_file(self.prefs.get("timer_sound"))
         
         ## STATS
         # path to the stats file FIXME
@@ -622,6 +625,7 @@ class Tomado(object):
             if sound.title != sender.title:
                 sound.state = 0
         save_file(self.prefs_path, self.prefs)
+        self.notification_playback.load_file(self.prefs.get("timer_sound"))
 
     def sounds_toggle(self, sender):
         """toggles (on/off) sounds of the app
@@ -651,7 +655,7 @@ class Tomado(object):
                 message=self.config["{}_message".format(type)],
                 sound=False)
         if self.prefs.get("allow_sound"):
-            playsound(self.prefs.get("timer_sound"))
+            self.notification_playback.play()
 
     def not_clickable_notification(self):
         """notidies the user when a non clickable MenuItem is pressed

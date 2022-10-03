@@ -11,7 +11,7 @@
 # 2022
 ################################################################################
 
-from playsound import playsound
+from just_playback import Playback
 import json
 import rumps
 
@@ -33,6 +33,10 @@ def secs_to_time(seconds, hours=False):
         mins, secs = divmod(seconds, 60)
         return '{:02d}:{:02d}'.format(mins, secs)
 
+
+button_sound_playback = Playback() # creates an object for managing playback of a single audio file
+button_sound_playback.load_file('sounds/button.mp3')
+
 def button_sound(allow_sound):
     """Plays a button-pressed feedback sound
 
@@ -40,7 +44,7 @@ def button_sound(allow_sound):
         allow_sound (bool): if true, plays the feedback sound
     """
     if allow_sound:
-        playsound("sounds/button.mp3")
+        button_sound_playback.play()
     else:
         pass
 
