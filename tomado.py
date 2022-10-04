@@ -10,15 +10,13 @@
 #
 # 2022
 #
-# TODO: quiet mode
+# TODO: volume
 # FIXME: quit doesn't work when app has just been launched
 #
 ################################################################################
 
 import rumps
 import time
-
-from just_playback import Playback
 
 from utilities import *
 
@@ -103,6 +101,7 @@ class Tomado(object):
         # setting up the playback object for notification sounds
         self.notification_playback = Playback() # creates an object for managing playback of a single audio file
         self.notification_playback.load_file(self.prefs.get("timer_sound"))
+        self.notification_playback.set_volume(self.prefs.get("sound_volume"))
         
         ## STATS
         # path to the stats file FIXME
@@ -646,12 +645,13 @@ class Tomado(object):
         """
         temp = str(int(self.prefs["sound_volume"] * 100)) + "%"
         self.prefs["sound_volume"] = int(sender.title.strip("%"))/100
-        sender.state = 1
         for option in self.sound_volume_options:
             if option.title == temp:
                 option.state = 0
                 break
+        sender.state = 1
         save_file(self.prefs_path, self.prefs)
+        self.notification_playback.set_volume(self.prefs.get("sound_volume"))
 
     def change_sound(self, sender):
         """changes the sound that notifies the user at the end of the interval in prefs
@@ -661,11 +661,11 @@ class Tomado(object):
         """
         temp = self.prefs["timer_sound"][7:][:-4].capitalize()
         self.prefs["timer_sound"] = "sounds/" + sender.title.lower() + ".mp3"
-        sender.state = 1
         for sound in self.sound_options:
             if sound.title == temp:
                 sound.state = 0
                 break
+        sender.state = 1
         save_file(self.prefs_path, self.prefs)
         self.notification_playback.load_file(self.prefs.get("timer_sound"))
     
