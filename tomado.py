@@ -10,7 +10,7 @@
 #
 # 2022
 #
-# TODO: volume
+# TODO: volume on button sound
 # FIXME: quit doesn't work when app has just been launched
 #
 ################################################################################
@@ -388,7 +388,7 @@ class Tomado(object):
             sender (string, MenuItem): information on the sender
         """
         if type(sender) == rumps.rumps.MenuItem:
-            button_sound(self.prefs.get("allow_sound"))
+            button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # stop the timer
         self.timer.stop()
         # save interval
@@ -720,7 +720,7 @@ class Tomado(object):
         """
         # check if the function is being triggered by a button
         if type(sender) == rumps.rumps.MenuItem:
-            button_sound(self.prefs.get("allow_sound"))
+            button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
             # replace the start button to the pause button
             self.swap_menu_item(self.start_button, self.pause_button)
         # define the timer length from preferences
@@ -753,7 +753,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        button_sound(self.prefs.get("allow_sound"))
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # stop the timer
         self.timer.stop()
         # swap the pause_button for the continue button
@@ -765,7 +765,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        button_sound(self.prefs.get("allow_sound"))
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # starts the timer
         self.timer.start()
         # replaces the continue button with the pause button
@@ -777,7 +777,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        button_sound(self.prefs.get("allow_sound"))
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # load the next interval
         self.load_timer("reset_timer")
 
@@ -787,7 +787,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        button_sound(self.prefs.get("allow_sound"))
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # save interval
         self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
         # if the timer has not started yet
@@ -818,6 +818,7 @@ class Tomado(object):
         Args:
             sender (_type_): _description_
         """
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         self.end_session(sender="")
         rumps.quit_application(sender=None)
 

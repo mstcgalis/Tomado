@@ -37,13 +37,15 @@ def secs_to_time(seconds, hours=False):
 button_sound_playback = Playback() # creates an object for managing playback of a single audio file
 button_sound_playback.load_file('sounds/button.mp3')
 
-def button_sound(allow_sound):
+def button_sound(allow_sound, sound_volume):
     """Plays a button-pressed feedback sound
 
     Args:
         allow_sound (bool): if true, plays the feedback sound
+        sound_volume (float): the volume 0.1-1
     """
     if allow_sound:
+        button_sound_playback.set_volume(sound_volume)
         button_sound_playback.play()
     else:
         pass
