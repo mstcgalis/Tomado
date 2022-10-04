@@ -10,9 +10,8 @@
 #
 # 2022
 #
-# TODO: figure out if i want intervals to stop, when i lock the screen
 # TODO: quiet mode
-#
+# FIXME: quit doesn't work when app has just been launched
 #
 ################################################################################
 
