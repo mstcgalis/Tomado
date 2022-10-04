@@ -10,7 +10,6 @@
 # 
 # License:  GPL v3
 # 2022
-#
 ################################################################################
 
 __version__ = "0.2.3-alpha"
@@ -19,6 +18,9 @@ import rumps
 import time
 
 from utilities import *
+
+import pdb
+pdb.set_trace()
 
 class Tomado(object):
     def __init__(self):

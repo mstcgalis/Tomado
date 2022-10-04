@@ -6,22 +6,23 @@
 #           danielgalis21@gmail.com
 #           GitHub: @mstcgalis
 #           Discord: @danielmstc#2967
-# License:  GPL v3
+#           Are.na: are.na/daniel-galis
 #
+# License:  GPL v3
 # 2022
 ################################################################################
 
 from setuptools import setup
 
-APP = ['Tomado.py']
-VERSION = "0.2.2a"
+APP = ['tomado.py']
+VERSION = "0.2.3a"
 DATA_FILES = ["icons/tomado.icns", 'icons', 'sounds']
 OPTIONS = {
     'argv_emulation': True,
     'plist': {
         'LSUIElement': True,
     },
-    'packages': ['rumps', 'playsound'],
+    'packages': ['rumps', 'just_playback'],
     'iconfile': "icons/tomado.icns",
 }
 

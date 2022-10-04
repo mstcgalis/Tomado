@@ -6,8 +6,9 @@
 #           danielgalis21@gmail.com
 #           GitHub: @mstcgalis
 #           Discord: @danielmstc#2967
-# License:  GPL v3
+#           Are.na: are.na/daniel-galis
 #
+# License:  GPL v3
 # 2022
 ################################################################################
 

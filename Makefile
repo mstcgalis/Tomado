@@ -1,4 +1,4 @@
-VERSION = v0.2.2-alpha
+VERSION = v0.2.3-alpha
 
 make all: app dmg
 
