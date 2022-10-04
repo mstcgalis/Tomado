@@ -6,21 +6,19 @@
 #           danielgalis21@gmail.com
 #           GitHub: @mstcgalis
 #           Discord: @danielmstc#2967
+#           Are.na: are.na/daniel-galis
+# 
 # License:  GPL v3
-#
 # 2022
 #
-# TODO: volume on button sound
-# FIXME: quit doesn't work when app has just been launched
-#
 ################################################################################
+
+__version__ = "0.2.3-alpha"
 
 import rumps
 import time
 
 from utilities import *
-
-__version__ = "0.2.3-alpha"
 
 class Tomado(object):
     def __init__(self):
@@ -270,7 +268,7 @@ class Tomado(object):
             first_button = self.start_button
 
         # set the first button to either Start or Pause
-        try :self.swap_menu_item(self.start_button, first_button)
+        try: self.swap_menu_item(self.start_button, first_button)
         except: pass
         try: self.swap_menu_item(self.pause_button, first_button)
         except: pass
@@ -411,8 +409,8 @@ class Tomado(object):
                             "{}-{}_{}".format(session, current_date, current_time) : intervals
                         }
                         sessions.update(sessions_update)
+                        sessions.pop(session)
                         break
-                sessions.pop(session)
         
         save_file(self.stats_path, stats)
 
