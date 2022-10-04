@@ -23,7 +23,7 @@ from just_playback import Playback
 
 from utilities import *
 
-__version__ = "0.2.2-alpha"
+__version__ = "0.2.3-alpha"
 
 class Tomado(object):
     def __init__(self):
@@ -78,7 +78,7 @@ class Tomado(object):
         # settings that can be user defined
         # default prefs
         self.default_prefs = {
-            "version": "{}".format(self.config.get("version")),
+            "version": __version__,
             "pomodoro_length": 1500,
             "break_length": 300,
             "long_length": 900,
@@ -86,6 +86,7 @@ class Tomado(object):
             "autostart_break": True,
             "autostart_session": False,
             "allow_sound": True,
+            "sound_volume": 1,
             "timer_sound": "sounds/beep.mp3"
         }
         # path to the preferences file
@@ -145,6 +146,9 @@ class Tomado(object):
         self.autostart_session_button.type = "session"
         # sounds toggle
         self.allow_sounds_button = rumps.MenuItem("Allow Sounds", callback=self.sounds_toggle)
+        # sound volume
+        self.sound_volume = rumps.MenuItem("Sound Volume")
+        self.sound_volume_options = create_submenu(list(str(i)+"%" for i in range(10, 110, 10)), self.change_volume)
         # sound preferences
         self.sound_preferences_button = rumps.MenuItem("Timer Sound")
         self.sound_options = create_submenu(self.config.get("sound_options"), self.change_sound)
@@ -205,6 +209,8 @@ class Tomado(object):
                     self.autostart_session_button,
                     None,
                     self.allow_sounds_button,
+                    [self.sound_volume,
+                        self.sound_volume_options],
                     [self.sound_preferences_button, 
                         self.sound_options]
                     ]
@@ -560,13 +566,18 @@ class Tomado(object):
             self.allow_sounds_button.state = 1
         else:
             self.allow_sounds_button.state = 0
+        # SOUND VOLUME
+        for option in self.sound_volume_options:
+            if int(option.title.strip("%"))/100 == self.prefs.get("sound_volume"):
+                option.state = 1
+                break
         # SOUND SELECT
         for option in self.sound_options:
             # if the title of the button is the same as the file in preferences
             if "sounds/" + option.title.lower() + ".mp3" == self.prefs.get("timer_sound"):
                 # make the button active
                 option.state = 1
-    
+                break
     def autostart_toggle(self, sender):
         """toggles the autostart (of Pomodoros or Breaks) and saves it to the preferences file
 
@@ -626,6 +637,9 @@ class Tomado(object):
                 sound.state = 0
         save_file(self.prefs_path, self.prefs)
         self.notification_playback.load_file(self.prefs.get("timer_sound"))
+
+    def change_volume(self, sender):
+        pass
 
     def sounds_toggle(self, sender):
         """toggles (on/off) sounds of the app
