@@ -623,28 +623,11 @@ class Tomado(object):
         save_file(self.prefs_path, self.prefs)
 
     ## SOUNDS
-    def change_sound(self, sender):
-        """changes the sound that notifies the user at the end of the interval
-
-        Args:
-            sender (string, MenuItem): information on the sender
-        """
-        self.prefs["timer_sound"] = "sounds/" + sender.title.lower() + ".mp3"
-        sender.state = 1
-        for sound in self.sound_options:
-            if sound.title != sender.title:
-                sound.state = 0
-        save_file(self.prefs_path, self.prefs)
-        self.notification_playback.load_file(self.prefs.get("timer_sound"))
-
-    def change_volume(self, sender):
-        pass
-
     def sounds_toggle(self, sender):
         """toggles (on/off) sounds of the app
 
         Args:
-            sender (string, MenuItem): information on the sender
+            sender (string, MenuItem): the sender button
         """
         # change the preferences value to the other bool
         self.prefs["allow_sound"] = not self.prefs["allow_sound"]
@@ -654,6 +637,37 @@ class Tomado(object):
         else:
             sender.state = 0
         save_file(self.prefs_path, self.prefs)
+
+    def change_volume(self, sender):
+        """changes the sound volume in prefs and updates the menu
+
+        Args:
+            sender (string, MenuItem): the sender button
+        """
+        temp = str(int(self.prefs["sound_volume"] * 100)) + "%"
+        self.prefs["sound_volume"] = int(sender.title.strip("%"))/100
+        sender.state = 1
+        for option in self.sound_volume_options:
+            if option.title == temp:
+                option.state = 0
+                break
+        save_file(self.prefs_path, self.prefs)
+
+    def change_sound(self, sender):
+        """changes the sound that notifies the user at the end of the interval in prefs
+
+        Args:
+            sender (string, MenuItem): the sender button
+        """
+        temp = self.prefs["timer_sound"][7:][:-4].capitalize()
+        self.prefs["timer_sound"] = "sounds/" + sender.title.lower() + ".mp3"
+        sender.state = 1
+        for sound in self.sound_options:
+            if sound.title == temp:
+                sound.state = 0
+                break
+        save_file(self.prefs_path, self.prefs)
+        self.notification_playback.load_file(self.prefs.get("timer_sound"))
     
     ## NOTIFICATIONS
     def interval_notification(self, type):
