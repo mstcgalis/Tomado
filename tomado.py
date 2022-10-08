@@ -19,9 +19,6 @@ import time
 
 from utilities import *
 
-import pdb
-pdb.set_trace()
-
 class Tomado(object):
     def __init__(self):
         ## CONFIG
@@ -99,8 +96,8 @@ class Tomado(object):
             self.prefs = prefs_update(self.prefs, self.default_prefs)
             save_file(self.prefs_path, self.prefs)
         # setting up the playback object for notification sounds
-        self.notification_playback = Playback() # creates an object for managing playback of a single audio file
-        self.notification_playback.load_file(self.prefs.get("timer_sound"))
+        mixer.init()
+        self.notification_playback = mixer.Sound(self.prefs.get("timer_sound"))
         self.notification_playback.set_volume(self.prefs.get("sound_volume"))
         
         ## STATS
@@ -667,7 +664,7 @@ class Tomado(object):
                 break
         sender.state = 1
         save_file(self.prefs_path, self.prefs)
-        self.notification_playback.load_file(self.prefs.get("timer_sound"))
+        self.notification_playback.Sound(self.prefs.get("timer_sound"))
     
     ## NOTIFICATIONS
     def interval_notification(self, type):

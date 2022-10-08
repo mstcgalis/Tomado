@@ -12,9 +12,11 @@
 # 2022
 ################################################################################
 
-from just_playback import Playback
+from pygame import mixer
 import json
 import rumps
+
+mixer.init()
 
 def secs_to_time(seconds, hours=False):
     """Takes an integer of seconds and convertes it into a mm:ss string, or a HHh:MMm string
@@ -35,8 +37,7 @@ def secs_to_time(seconds, hours=False):
         return '{:02d}:{:02d}'.format(mins, secs)
 
 
-button_sound_playback = Playback() # creates an object for managing playback of a single audio file
-button_sound_playback.load_file('sounds/button.mp3')
+button_sound_playback = mixer.Sound('sounds/button.mp3')
 
 def button_sound(allow_sound, sound_volume):
     """Plays a button-pressed feedback sound
