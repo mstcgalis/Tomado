@@ -1,9 +1,15 @@
-VERSION = v0.2.2-alpha
+VERSION = v0.2.3-alpha
 
 make all: app dmg
 
 app:
 	python3.9 setup.py py2app
+
+alias:
+	python3.9 setup.py py2app -A
+
+run:
+	./dist/Tomado.app/Contents/MacOS/Tomado
 
 dmg:
 	create-dmg \

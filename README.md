@@ -2,13 +2,13 @@
 
 Simple Pomodoro Timer that lives in your MacOS menu bar 💻
 
-<img width="222" alt="Screenshot 2022-05-19 at 11 30 19" src="https://user-images.githubusercontent.com/77400726/169261760-777aa046-c670-432d-8a31-c3e76d2590ed.png">
+<img width="222" alt="screenshot of the app" src="https://user-images.githubusercontent.com/77400726/169261760-777aa046-c670-432d-8a31-c3e76d2590ed.png">
 
 Please create a Pull Request or Issue if you encounter an error. I'm also always open to talk 🌱
 
 ## Installation - easy way
 
-1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.2.2-alpha) (v0.2.2-alpha)
+1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.2.3-alpha) (v0.2.3-alpha)
 2. Mount the `.dmg` and move `Tomado` to `Applications`
 3. Open `Tomado`
 4. Go to `System Preferences -> Security & Privacy -> General -> click "Open Anyway"`
@@ -30,9 +30,6 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 6. Go to `System Preferences -> Security & Privacy -> General -> click "Open Anyway"`
 7. Thanks for installing! 😊 Don't forget to enable notifications
 
-## Roadmap
-
-- Todo intergration with [list.app](https://www.are.na/daniel-galis/self-governance) and maybe third party software (Notion, Trello?...)
 ---
 
 made with ❤️, care and patience by [Daniel Gális](https://www.are.na/daniel-galis)

@@ -6,24 +6,18 @@
 #           danielgalis21@gmail.com
 #           GitHub: @mstcgalis
 #           Discord: @danielmstc#2967
+#           Are.na: are.na/daniel-galis
+# 
 # License:  GPL v3
-#
 # 2022
-#
-# TODO: figure out if i want intervals to stop, when i lock the screen
-#		
-#
-#
 ################################################################################
 
-from enum import auto
-from subprocess import call
+__version__ = "0.2.3-alpha"
+
 import rumps
 import time
 
 from utilities import *
-
-__version__ = "0.2.2-alpha"
 
 class Tomado(object):
     def __init__(self):
@@ -78,7 +72,7 @@ class Tomado(object):
         # settings that can be user defined
         # default prefs
         self.default_prefs = {
-            "version": "{}".format(self.config.get("version")),
+            "version": __version__,
             "pomodoro_length": 1500,
             "break_length": 300,
             "long_length": 900,
@@ -86,6 +80,7 @@ class Tomado(object):
             "autostart_break": True,
             "autostart_session": False,
             "allow_sound": True,
+            "sound_volume": 1,
             "timer_sound": "sounds/beep.mp3"
         }
         # path to the preferences file
@@ -98,13 +93,17 @@ class Tomado(object):
             save_file(self.prefs_path, self.prefs)
         # if the version doesnt match, use the saved preferences where possible
         if self.prefs.get("version") != self.config.get("version"):
-            print("hello")
             self.prefs = prefs_update(self.prefs, self.default_prefs)
             save_file(self.prefs_path, self.prefs)
+        # setting up the playback object for notification sounds
+        self.notification_playback = mixer.Sound(self.prefs.get("timer_sound"))
+        self.notification_playback.set_volume(self.prefs.get("sound_volume"))
         
         ## STATS
-        # path to the stats file
+        # path to the stats file FIXME
         self.stats_path = str(self.folder + '/stats.json')
+        # for test purposes use: 
+        #   self.stats_path = str('testfiles/stats.json')
         # if stats file doesnt exist, create it
         with open(self.stats_path, "a") as f:
             pass
@@ -141,6 +140,9 @@ class Tomado(object):
         self.autostart_session_button.type = "session"
         # sounds toggle
         self.allow_sounds_button = rumps.MenuItem("Allow Sounds", callback=self.sounds_toggle)
+        # sound volume
+        self.sound_volume = rumps.MenuItem("Sound Volume")
+        self.sound_volume_options = create_submenu(list(str(i)+"%" for i in range(10, 110, 10)), self.change_volume)
         # sound preferences
         self.sound_preferences_button = rumps.MenuItem("Timer Sound")
         self.sound_options = create_submenu(self.config.get("sound_options"), self.change_sound)
@@ -201,6 +203,8 @@ class Tomado(object):
                     self.autostart_session_button,
                     None,
                     self.allow_sounds_button,
+                    [self.sound_volume,
+                        self.sound_volume_options],
                     [self.sound_preferences_button, 
                         self.sound_options]
                     ]
@@ -262,7 +266,7 @@ class Tomado(object):
             first_button = self.start_button
 
         # set the first button to either Start or Pause
-        try :self.swap_menu_item(self.start_button, first_button)
+        try: self.swap_menu_item(self.start_button, first_button)
         except: pass
         try: self.swap_menu_item(self.pause_button, first_button)
         except: pass
@@ -380,7 +384,7 @@ class Tomado(object):
             sender (string, MenuItem): information on the sender
         """
         if type(sender) == rumps.rumps.MenuItem:
-            button_sound(self.prefs.get("allow_sound"))
+            button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # stop the timer
         self.timer.stop()
         # save interval
@@ -403,8 +407,8 @@ class Tomado(object):
                             "{}-{}_{}".format(session, current_date, current_time) : intervals
                         }
                         sessions.update(sessions_update)
+                        sessions.pop(session)
                         break
-                sessions.pop(session)
         
         save_file(self.stats_path, stats)
 
@@ -556,13 +560,18 @@ class Tomado(object):
             self.allow_sounds_button.state = 1
         else:
             self.allow_sounds_button.state = 0
+        # SOUND VOLUME
+        for option in self.sound_volume_options:
+            if int(option.title.strip("%"))/100 == self.prefs.get("sound_volume"):
+                option.state = 1
+                break
         # SOUND SELECT
         for option in self.sound_options:
             # if the title of the button is the same as the file in preferences
             if "sounds/" + option.title.lower() + ".mp3" == self.prefs.get("timer_sound"):
                 # make the button active
                 option.state = 1
-    
+                break
     def autostart_toggle(self, sender):
         """toggles the autostart (of Pomodoros or Breaks) and saves it to the preferences file
 
@@ -609,24 +618,11 @@ class Tomado(object):
         save_file(self.prefs_path, self.prefs)
 
     ## SOUNDS
-    def change_sound(self, sender):
-        """changes the sound that notifies the user at the end of the interval
-
-        Args:
-            sender (string, MenuItem): information on the sender
-        """
-        self.prefs["timer_sound"] = "sounds/" + sender.title.lower() + ".mp3"
-        sender.state = 1
-        for sound in self.sound_options:
-            if sound.title != sender.title:
-                sound.state = 0
-        save_file(self.prefs_path, self.prefs)
-
     def sounds_toggle(self, sender):
         """toggles (on/off) sounds of the app
 
         Args:
-            sender (string, MenuItem): information on the sender
+            sender (string, MenuItem): the sender button
         """
         # change the preferences value to the other bool
         self.prefs["allow_sound"] = not self.prefs["allow_sound"]
@@ -636,6 +632,40 @@ class Tomado(object):
         else:
             sender.state = 0
         save_file(self.prefs_path, self.prefs)
+
+    def change_volume(self, sender):
+        """changes the sound volume in prefs and updates the menu
+
+        Args:
+            sender (string, MenuItem): the sender button
+        """
+        temp = str(int(self.prefs["sound_volume"] * 100)) + "%"
+        self.prefs["sound_volume"] = int(sender.title.strip("%"))/100
+        for option in self.sound_volume_options:
+            if option.title == temp:
+                option.state = 0
+                break
+        sender.state = 1
+        save_file(self.prefs_path, self.prefs)
+        self.notification_playback.set_volume(self.prefs.get("sound_volume"))
+
+    def change_sound(self, sender):
+        """changes the sound that notifies the user at the end of the interval in prefs
+
+        Args:
+            sender (string, MenuItem): the sender button
+        """
+        temp = self.prefs["timer_sound"][7:][:-4].capitalize()
+        self.prefs["timer_sound"] = "sounds/" + sender.title.lower() + ".mp3"
+        for sound in self.sound_options:
+            if sound.title == temp:
+                sound.state = 0
+                break
+        sender.state = 1
+        save_file(self.prefs_path, self.prefs)
+        del self.notification_playback
+        self.notification_playback = mixer.Sound(self.prefs.get("timer_sound"))
+        self.notification_playback.set_volume(self.prefs.get("sound_volume"))
     
     ## NOTIFICATIONS
     def interval_notification(self, type):
@@ -650,7 +680,7 @@ class Tomado(object):
                 message=self.config["{}_message".format(type)],
                 sound=False)
         if self.prefs.get("allow_sound"):
-            playsound(self.prefs.get("timer_sound"))
+            self.notification_playback.play()
 
     def not_clickable_notification(self):
         """notidies the user when a non clickable MenuItem is pressed
@@ -688,7 +718,7 @@ class Tomado(object):
         """
         # check if the function is being triggered by a button
         if type(sender) == rumps.rumps.MenuItem:
-            button_sound(self.prefs.get("allow_sound"))
+            button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
             # replace the start button to the pause button
             self.swap_menu_item(self.start_button, self.pause_button)
         # define the timer length from preferences
@@ -721,7 +751,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        button_sound(self.prefs.get("allow_sound"))
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # stop the timer
         self.timer.stop()
         # swap the pause_button for the continue button
@@ -733,7 +763,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        button_sound(self.prefs.get("allow_sound"))
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # starts the timer
         self.timer.start()
         # replaces the continue button with the pause button
@@ -745,7 +775,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        button_sound(self.prefs.get("allow_sound"))
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # load the next interval
         self.load_timer("reset_timer")
 
@@ -755,7 +785,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        button_sound(self.prefs.get("allow_sound"))
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # save interval
         self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
         # if the timer has not started yet
@@ -786,6 +816,7 @@ class Tomado(object):
         Args:
             sender (_type_): _description_
         """
+        button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         self.end_session(sender="")
         rumps.quit_application(sender=None)
 

@@ -6,14 +6,17 @@
 #           danielgalis21@gmail.com
 #           GitHub: @mstcgalis
 #           Discord: @danielmstc#2967
-# License:  GPL v3
+#           Are.na: are.na/daniel-galis
 #
+# License:  GPL v3
 # 2022
 ################################################################################
 
-from playsound import playsound
+from pygame import mixer
 import json
 import rumps
+
+mixer.init()
 
 def secs_to_time(seconds, hours=False):
     """Takes an integer of seconds and convertes it into a mm:ss string, or a HHh:MMm string
@@ -33,14 +36,19 @@ def secs_to_time(seconds, hours=False):
         mins, secs = divmod(seconds, 60)
         return '{:02d}:{:02d}'.format(mins, secs)
 
-def button_sound(allow_sound):
+
+button_sound_playback = mixer.Sound('sounds/button.mp3')
+
+def button_sound(allow_sound, sound_volume):
     """Plays a button-pressed feedback sound
 
     Args:
         allow_sound (bool): if true, plays the feedback sound
+        sound_volume (float): the volume 0.1-1
     """
     if allow_sound:
-        playsound("sounds/button.mp3")
+        button_sound_playback.set_volume(sound_volume)
+        button_sound_playback.play()
     else:
         pass
 
