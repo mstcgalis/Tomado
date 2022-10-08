@@ -1,7 +1,7 @@
 altgraph==0.17.2
 macholib==1.16
 modulegraph==0.19.2
-just-playback             0.1.7
+pygame==2.1.2
 py2app==0.28.2
 pyobjc-core==8.5
 pyobjc-framework-Cocoa==8.5
