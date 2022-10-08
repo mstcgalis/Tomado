@@ -14,7 +14,7 @@
 
 from setuptools import setup
 
-APP = ['tomado.py']
+APP = ['Tomado.py']
 VERSION = "0.2.3a"
 DATA_FILES = ["icons/tomado.icns", 'icons', 'sounds']
 OPTIONS = {
