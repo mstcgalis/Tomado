@@ -8,7 +8,7 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 
 ## Installation - easy way
 
-1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.2.2-alpha) (v0.2.2-alpha)
+1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.2.3-alpha) (v0.2.3-alpha)
 2. Mount the `.dmg` and move `Tomado` to `Applications`
 3. Open `Tomado`
 4. Go to `System Preferences -> Security & Privacy -> General -> click "Open Anyway"`
@@ -30,10 +30,6 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 6. Go to `System Preferences -> Security & Privacy -> General -> click "Open Anyway"`
 7. Thanks for installing! 😊 Don't forget to enable notifications
 
-## Roadmap
-
-- Decide how to treat the screen getting locked while an interval is active and implement the solution
-- Todo intergration with [list.app](https://www.are.na/daniel-galis/self-governance) and maybe third party software (Notion, Trello?...)
 ---
 
 made with ❤️, care and patience by [Daniel Gális](https://www.are.na/daniel-galis)
