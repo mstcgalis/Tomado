@@ -14,7 +14,7 @@ run:
 dmg:
 	create-dmg \
 	--volname "Tomado Installer $(VERSION)" \
-	--volicon "/Users/admin/Desktop/tomado/Tomado/icons/tomado.icns" \
+	--volicon "/Users/danielgalis/Desktop/code/Tomado/icons/tomado.icns" \
 	--window-pos 100 60 \
 	--window-size 430 270 \
 	--icon-size 100 \
@@ -22,7 +22,7 @@ dmg:
 	--hide-extension "Tomado.app" \
 	--app-drop-link 300 100 \
 	"Tomado-Installer-$(VERSION).dmg" \
-	"/Users/admin/Desktop/tomado/Tomado/dist"
+	"/Users/danielgalis/Desktop/code/Tomado/dist"
 
 .PHONY: clean
 
