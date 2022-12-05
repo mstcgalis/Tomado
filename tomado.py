@@ -85,12 +85,16 @@ class Tomado(object):
         }
         # path to the preferences file
         self.prefs_path = str(self.folder + "/prefs.json")
+
         # open prefs from file
-        self.prefs = open_file(self.prefs_path)
+        try:
+            with open(self.prefs_path, "r") as f:
+                self.prefs = json.load(f)
         # if it is empty (file didnt exist) use default prefs
-        if not bool(self.prefs):
+        except FileNotFoundError:
             self.prefs = self.default_prefs    
             save_file(self.prefs_path, self.prefs)
+
         # if the version doesnt match, use the saved preferences where possible
         if self.prefs.get("version") != self.config.get("version"):
             self.prefs = prefs_update(self.prefs, self.default_prefs)
