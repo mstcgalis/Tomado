@@ -28,7 +28,7 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 3. Make sure to install all the dependencies using `$ pip install -r requirements.txt`
 4. Use the Makefile:
   - `$ make clean` removes every built file
-  - `$ make alias` builds the app in alias mode (not standalone - editing source code doesn't require rebuilding) at `Tomado/dist/Tomado.app`
+  - `$ make alias` builds the app in alias mode (not portable, editing source code doesn't require rebuilding) at `Tomado/dist/Tomado.app`
   - `$ make app` builds the standalone app at `Tomado/dist/Tomado.app`
   - `$ make launch` launches the app at `Tomado/dist/Tomado.app` (alias or standalone)
   - `$ make dmg` created the installer dmg at -> `Tomado/Tomado-version-installer.dmg
