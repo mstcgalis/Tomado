@@ -12,7 +12,7 @@
 # 2022
 ################################################################################
 
-__version__ = "0.2.3-alpha"
+__version__ = "0.2.4-alpha"
 
 import rumps
 import time
@@ -35,7 +35,7 @@ class Tomado(object):
             "pomodoro_symbol" : "icons/pomodoro.png",
             "break_symbol" : "icons/break.png",
             "long_symbol" : "icons/long.png",
-            "pomodoro_length_options" : ["15", "20", "25", "30", "40", "45", "60"],
+            "pomodoro_length_options" : ["5", "10", "15", "20", "25", "30", "40", "45", "60"],
             "break_length_options" : ["3", "5", "10", "15", "20"],
             "long_length_options" : ["10", "15", "20", "25", "30"],
             "sound_options" : ["Beep", "Birds", "Ding", "Cicadas", "Wood"]
@@ -170,11 +170,11 @@ class Tomado(object):
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.start_button = rumps.MenuItem("Start", callback=self.start_timer, key="s", icon="icons/start.png", template=True)
         # pause_pomodoro button is created as a rumps.MenuItem, callback is the pause_timer method
-        self.pause_button = rumps.MenuItem("Pause", callback=self.pause_timer, key="s", icon="icons/pause.png", template=True)
+        self.pause_button = rumps.MenuItem("Pause", callback=self.pause_timer, key="p", icon="icons/pause.png", template=True)
         # start_pomodoro button is created as a rumps.MenuItem, callback is the start_timer method
         self.continue_button = rumps.MenuItem("Continue", callback=self.continue_timer, key="s", icon="icons/start.png", template=True)
         # the skip_pomodoro button is created as a rumps.MenuItem, callback is the skip_timer method
-        self.skip_button = rumps.MenuItem("Skip", callback=self.skip_timer, key="k", icon="icons/skip.png", template=True)
+        self.skip_button = rumps.MenuItem("Skip", callback=self.skip_timer, icon="icons/skip.png", template=True)
         # the reset_pomodoro button is created as a rumps.MenuItem, callback is the reset_timer method
         self.reset_button = rumps.MenuItem("Reset", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
@@ -391,8 +391,10 @@ class Tomado(object):
             button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # stop the timer
         self.timer.stop()
-        # save interval
-        self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
+        # if the sender is not the loaded_state function
+        if sender != "loaded_state":
+            # save interval
+            self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
 
         # open the data dictionary from json
         stats = {}
@@ -403,17 +405,16 @@ class Tomado(object):
         current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
         current_time = time.strftime("%H:%M%:%S", time.localtime(time.time()))
 
-        for week, sessions in stats.items():
-            if week == current_week:
-                for session, intervals in sessions.items():
-                    if "-" not in session:
-                        sessions_update = {
-                            "{}-{}_{}".format(session, current_date, current_time) : intervals
-                        }
-                        sessions.update(sessions_update)
-                        sessions.pop(session)
-                        break
-        
+        if current_week in stats:
+            sessions = stats[current_week]
+            for session_id in sessions:
+                if "-" not in session_id:  # session has not ended yet
+                    intervals = sessions[session_id]
+                    new_session_id = "{}-{}_{}".format(session_id, current_date, current_time)
+                    sessions[new_session_id] = intervals
+                    del sessions[session_id]
+                    break
+
         save_file(self.stats_path, stats)
 
         self.session_current.clear()
@@ -450,35 +451,25 @@ class Tomado(object):
             current_date = self.interval_start
             current_time = "00:00:00"
 
-        for week, sessions in stats.items():
-            if week == current_week:
-                for session, intervals in sessions.items():
-                    if "-" not in session: # session has not ended yet
-                        intervals_update = {
-                            "{}_{}_{}".format(save_interval, current_date, current_time) : save_length
-                        }
-                        intervals.update(intervals_update)
-                        save_file(self.stats_path, stats)
-                        return True # saved interval into current session
-                sessions_update = {
-                    "{}_{}".format(current_date, current_time) : {
-                        "{}_{}_{}".format(save_interval, current_date, current_time) : save_length
-                        }
-                }
-                sessions.update(sessions_update)
+        if current_week in stats:
+            sessions = stats[current_week]
+        else:
+            sessions = {}
+            stats[current_week] = sessions
+
+        if len(sessions) > 0:
+            session_id, intervals = list(sessions.items())[-1]
+            if "-" not in session_id:  # session has not ended yet
+                intervals_update = {"{}_{}_{}".format(save_interval, current_date, current_time): save_length}
+                intervals.update(intervals_update)
                 save_file(self.stats_path, stats)
-                return True # created new session and save interval
-        # if stats is empty or there isnt current_week yet
-        stats_update = {
-            "{}".format(current_week) : {
-                "{}_{}".format(current_date, current_time) : {
-                    "{}_{}_{}".format(save_interval, current_date, current_time) : save_length
-                }
-            }
-        }
-        stats.update(stats_update)
+                return True  # saved interval into current session
+
+        session_id = "{}_{}".format(current_date, current_time)
+        intervals = {"{}_{}_{}".format(save_interval, current_date, current_time): save_length}
+        sessions[session_id] = intervals
         save_file(self.stats_path, stats)
-        return True # created new week, new session and saved interval
+        return True  # created new session and save interval
 
     def load_stats(self, sender):
         """loads stats from stats file and displays them in the menu (daily and weekly)
@@ -502,31 +493,23 @@ class Tomado(object):
         current_week = time.strftime("%Y_%W", time.localtime(time.time()))
         current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
 
-        for week, sessions in stats.items():
-            if week == current_week:
-                for session, intervals in sessions.items():
-                    # get weekly stats
-                    for interval, length in intervals.items():
-                        if interval.split("_")[0] == "pomodoro":
-                            week_pomodoros_time += length
-                            week_pomodoros += 1
-                        else:
-                            week_breakes_time += length
-                            week_breakes += 1
-                    # get daily stats
-                    # if start_time of unfinished, start_time of finished, or end_time of finished sessions is today
-                    session_date = ""
-                    for i in session.split("-"):
-                        session_date = i.split("_")[0]
-                        if session_date == current_date:
-                            for interval, length in intervals.items():
-                                if interval.split("_")[1] == current_date:
-                                    if interval.split("_")[0] == "pomodoro":
-                                        today_pomodoros_time += length
-                                        today_pomodoros += 1
-                                    else:
-                                        today_breakes_time += length
-                                        today_breakes += 1
+        for session, intervals in stats.get(current_week, {}).items():
+            # get weekly stats
+            for interval, length in intervals.items():
+                interval_type, interval_date, interval = interval.split("_")
+                if interval_type == "pomodoro":
+                    week_pomodoros_time += length
+                    week_pomodoros += 1
+                    if interval_date == current_date:
+                        today_pomodoros_time += length
+                        today_pomodoros += 1
+                else:
+                    week_breakes_time += length
+                    week_breakes += 1
+                    if interval_date == current_date:
+                        today_breakes_time += length
+                        today_breakes += 1
+
         # update the submenus
         self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(today_pomodoros, secs_to_time(today_pomodoros_time, hours=True))
         self.stats_today_breakes.title = "{} Breakes = {}".format(today_breakes, secs_to_time(today_breakes_time, hours=True))
