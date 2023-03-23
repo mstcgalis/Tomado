@@ -35,9 +35,9 @@ class Tomado(object):
             "pomodoro_symbol" : "icons/pomodoro.png",
             "break_symbol" : "icons/break.png",
             "long_symbol" : "icons/long.png",
-            "pomodoro_length_options" : ["5", "10", "15", "20", "25", "30", "40", "45", "60", "90"],
+            "pomodoro_length_options" : ["15", "20", "25", "30", "40", "45", "60"],
             "break_length_options" : ["3", "5", "10", "15", "20"],
-            "long_length_options" : ["5", "10", "15", "20", "25", "30"],
+            "long_length_options" : ["10", "15", "20", "25", "30"],
             "sound_options" : ["Beep", "Birds", "Ding", "Cicadas", "Wood"]
         }
        
