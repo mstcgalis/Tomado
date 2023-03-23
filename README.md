@@ -23,16 +23,16 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 
 # Building from source code
 
-1. Clone the repository: `git clone https://github.com/mstcgalis/Tomado.git`
+1. Clone the repository: `$ git clone https://github.com/mstcgalis/Tomado.git`
 - (recommended) Create adn activate a virtual python enviroment.
-2. Make sure to install all the dependencies using `pip install -r requirements.txt`
+2. Make sure to install all the dependencies using `$ pip install -r requirements.txt`
 
 3. Use the Makefile:
-  - `make clean` cleans every built file
-  - `make alias` builds the app in alias mode (dev, not standalone - no need to build repeatedly again when editing source code)
-  - `make app` builds the standalone app at -> `Tomado/dist/Tomado.app`
-  - `make dmg` created the installer dmg at -> `Tomado/Tomado-version-installer.dmg
-  - `make all` = `make app` + `make dmg`
+  - `$ make clean` cleans every built file
+  - `$ make alias` builds the app in alias mode (dev, not standalone - no need to build repeatedly again when editing source code)
+  - `$ make app` builds the standalone app at -> `Tomado/dist/Tomado.app`
+  - `$ make dmg` created the installer dmg at -> `Tomado/Tomado-version-installer.dmg
+  - `$ make all` = `$ make app` + `$ make dmg`
 
 4. Launching and using the app:
   - Go to `System Preferences -> Security & Privacy -> General -> click "Open Anyway"`
