@@ -8,11 +8,12 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 
 # Installation
 
-1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.2.4-alpha) (v0.2.3-alpha)
+1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.2.4-alpha) (v0.2.4-alpha)
 2. Mount the `.dmg` and move `🍅 Tomado` to `Applications`
 3. Open `🍅 Tomado`
 4. Go to `System Preferences -> Security & Privacy -> General -> click "Open Anyway"`
-5. Thenks for installing! 😊 Don't forget to **🔔 Enable notifications** ↓
+5. (to be fixed) `Don't allow` access to microphone
+6. Thenks for installing! 😊 Don't forget to **🔔 Enable notifications** ↓
 
 ## 🔔 Enable notifications
 
