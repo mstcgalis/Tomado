@@ -2,7 +2,7 @@
 
 Simple Pomodoro Timer that lives in your macOS menu bar.
 
-<img width="222" alt="screenshot of the app" src="https://user-images.githubusercontent.com/77400726/169261760-777aa046-c670-432d-8a31-c3e76d2590ed.png">
+<img width="222" alt="screenshot of the app" src="docs/screenshot.png">
 
 Please create a Pull Request or Issue if you encounter an error. I'm also always open to talk 🌱
 
