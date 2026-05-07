@@ -14,7 +14,9 @@
 
 __version__ = "0.2.4-alpha"
 
+import csv
 import json
+import os
 import time
 from datetime import date, datetime
 
@@ -174,6 +176,17 @@ class Tomado(object):
         self.stats_today_by_project = rumps.MenuItem("By Project")
         self.stats_week_project = rumps.MenuItem("○ No active project", callback=self.not_clickable_notification)
         self.stats_week_by_project = rumps.MenuItem("By Project")
+        # all time stats
+        self.stats_all_time_submenu = rumps.MenuItem("All Time Stats")
+        self.stats_all_time_pomodoros = rumps.MenuItem("Pomodoros:", callback=self.not_clickable_notification)
+        self.stats_all_time_pomodoros.icon = self.config.get("pomodoro_symbol")
+        self.stats_all_time_breaks = rumps.MenuItem("Breaks:", callback=self.not_clickable_notification)
+        self.stats_all_time_breaks.icon = self.config.get("break_symbol")
+        self.stats_all_time_project = rumps.MenuItem("○ No active project", callback=self.not_clickable_notification)
+        self.stats_all_time_by_project = rumps.MenuItem("By Project")
+        # export and clear
+        self.export_stats_button = rumps.MenuItem("Export Stats…", callback=self.export_stats)
+        self.clear_stats_button = rumps.MenuItem("Clear Stats…", callback=self.clear_stats)
 
 
         ## TIMER BUTTONS
@@ -209,6 +222,14 @@ class Tomado(object):
                     self.stats_week_breaks,
                     self.stats_week_project,
                     [self.stats_week_by_project, []]]],
+                [self.stats_all_time_submenu,
+                    [self.stats_all_time_pomodoros,
+                    self.stats_all_time_breaks,
+                    self.stats_all_time_project,
+                    [self.stats_all_time_by_project, []]]],
+                None,
+                self.export_stats_button,
+                self.clear_stats_button,
                 None,
                 [self.preferences_button, 
                     [[self.pomodoro_length_button, 
@@ -545,11 +566,16 @@ class Tomado(object):
         self.stats_week_pomodoros.title = "{} Pomodoros = {}".format(s["week"]["pomodoros"], secs_to_time(s["week"]["pomodoro_time"], hours=True))
         self.stats_week_breaks.title = "{} Breaks = {}".format(s["week"]["breaks"], secs_to_time(s["week"]["break_time"], hours=True))
 
+        self.stats_all_time_pomodoros.title = "{} Pomodoros = {}".format(s["all_time"]["pomodoros"], secs_to_time(s["all_time"]["pomodoro_time"], hours=True))
+        self.stats_all_time_breaks.title = "{} Breaks = {}".format(s["all_time"]["breaks"], secs_to_time(s["all_time"]["break_time"], hours=True))
+
         current = self.prefs.get("current_project", "")
         self._update_stats_project_line(self.stats_today_project, s["today"], current)
         self._update_stats_project_line(self.stats_week_project, s["week"], current)
+        self._update_stats_project_line(self.stats_all_time_project, s["all_time"], current)
         self._rebuild_by_project_submenu(self.stats_today_by_project, s["today"]["by_project"])
         self._rebuild_by_project_submenu(self.stats_week_by_project, s["week"]["by_project"])
+        self._rebuild_by_project_submenu(self.stats_all_time_by_project, s["all_time"]["by_project"])
 
     def _update_stats_project_line(self, item, period_stats, current_project):
         if current_project:
@@ -571,6 +597,43 @@ class Tomado(object):
             label = "{}: {} 🍅  {}".format(project, data["pomodoros"], secs_to_time(data["pomodoro_time"], hours=True))
             items.append(rumps.MenuItem(label, callback=self.not_clickable_notification))
         submenu_item.update(items)
+
+    def export_stats(self, sender):
+        stats = read_stats(self.stats_path)
+        if not stats:
+            rumps.alert("No Stats", "Nothing to export yet.")
+            return
+        filename = "tomado-stats-{}.csv".format(date.today().isoformat())
+        export_path = os.path.join(os.path.expanduser("~"), "Desktop", filename)
+        with open(export_path, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["date", "time", "type", "duration_seconds", "duration_minutes", "project"])
+            for record in stats:
+                try:
+                    dt = datetime.fromisoformat(record["start"])
+                except (KeyError, ValueError):
+                    continue
+                duration = record.get("duration", 0)
+                writer.writerow([
+                    dt.date().isoformat(),
+                    dt.strftime("%H:%M:%S"),
+                    record.get("type", ""),
+                    duration,
+                    round(duration / 60, 2),
+                    record.get("project", ""),
+                ])
+        rumps.alert("Exported", "Saved to Desktop/{}".format(filename))
+
+    def clear_stats(self, sender):
+        response = rumps.alert(
+            title="Clear Stats",
+            message="Permanently delete all tracked intervals?",
+            ok="Clear",
+            cancel="Cancel",
+        )
+        if response == 1:
+            save_file(self.stats_path, [])
+            self.load_stats(sender="")
 
     ## PREFERENCES
     def startup_display_preferences(self):

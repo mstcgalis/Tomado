@@ -141,20 +141,21 @@ def _add_to_project(by_project, project, interval_type, duration):
 
 
 def compute_stats(stats, today):
-    """Computes today's and this week's pomodoro/break counts and durations.
+    """Computes today's, this week's, and all-time pomodoro/break counts and durations.
 
     Args:
         stats: flat list of interval records
         today: datetime.date — the reference date
 
     Returns:
-        dict with keys 'today' and 'week', each containing:
+        dict with keys 'today', 'week', 'all_time', each containing:
             pomodoros, pomodoro_time, breaks, break_time, by_project
     """
     week_start = today - timedelta(days=today.weekday())
 
-    result_today = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0, by_project={})
-    result_week  = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0, by_project={})
+    result_today    = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0, by_project={})
+    result_week     = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0, by_project={})
+    result_all_time = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0, by_project={})
 
     for record in stats:
         try:
@@ -162,31 +163,42 @@ def compute_stats(stats, today):
         except (KeyError, ValueError):
             continue
 
+        duration = record.get("duration", 0)
+        project = record.get("project", "")
+        is_pomodoro = record.get("type") == "pomodoro"
+        itype = "pomodoro" if is_pomodoro else "break"
+
+        if is_pomodoro:
+            result_all_time["pomodoros"] += 1
+            result_all_time["pomodoro_time"] += duration
+        else:
+            result_all_time["breaks"] += 1
+            result_all_time["break_time"] += duration
+        _add_to_project(result_all_time["by_project"], project, itype, duration)
+
         if start_date < week_start:
             continue
 
-        is_today = start_date == today
-        duration = record.get("duration", 0)
-        project = record.get("project", "")
-
-        if record.get("type") == "pomodoro":
+        if is_pomodoro:
             result_week["pomodoros"] += 1
             result_week["pomodoro_time"] += duration
-            _add_to_project(result_week["by_project"], project, "pomodoro", duration)
-            if is_today:
-                result_today["pomodoros"] += 1
-                result_today["pomodoro_time"] += duration
-                _add_to_project(result_today["by_project"], project, "pomodoro", duration)
         else:
             result_week["breaks"] += 1
             result_week["break_time"] += duration
-            _add_to_project(result_week["by_project"], project, "break", duration)
-            if is_today:
-                result_today["breaks"] += 1
-                result_today["break_time"] += duration
-                _add_to_project(result_today["by_project"], project, "break", duration)
+        _add_to_project(result_week["by_project"], project, itype, duration)
 
-    return {"today": result_today, "week": result_week}
+        if start_date != today:
+            continue
+
+        if is_pomodoro:
+            result_today["pomodoros"] += 1
+            result_today["pomodoro_time"] += duration
+        else:
+            result_today["breaks"] += 1
+            result_today["break_time"] += duration
+        _add_to_project(result_today["by_project"], project, itype, duration)
+
+    return {"today": result_today, "week": result_week, "all_time": result_all_time}
 
 
 def prefs_update(prefs_og, prefs_new):
