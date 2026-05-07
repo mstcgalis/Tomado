@@ -85,7 +85,8 @@ class Tomado(object):
             "allow_sound": True,
             "sound_volume": 1,
             "timer_sound": "sounds/beep.mp3",
-            "current_project": ""
+            "current_project": "",
+            "projects": []
         }
         # path to the preferences file
         self.prefs_path = str(self.folder + "/prefs.json")
@@ -114,6 +115,9 @@ class Tomado(object):
             save_file(self.stats_path, [])
         # ISO timestamp set when an interval starts, used as the record's start time
         self.interval_start = ""
+
+        ## PROJECT
+        self.project_button = rumps.MenuItem("○ No Project")
 
         ## GENERAL BUTTONS
         # non clickable button showing info about current session
@@ -165,6 +169,11 @@ class Tomado(object):
         self.stats_today_breaks.icon = self.config.get("break_symbol")
         self.stats_week_breaks = rumps.MenuItem("Breaks:", callback=self.not_clickable_notification)
         self.stats_week_breaks.icon = self.config.get("break_symbol")
+        # active project line and per-project breakdown
+        self.stats_today_project = rumps.MenuItem("○ No active project", callback=self.not_clickable_notification)
+        self.stats_today_by_project = rumps.MenuItem("By Project")
+        self.stats_week_project = rumps.MenuItem("○ No active project", callback=self.not_clickable_notification)
+        self.stats_week_by_project = rumps.MenuItem("By Project")
 
 
         ## TIMER BUTTONS
@@ -180,20 +189,26 @@ class Tomado(object):
         self.reset_button = rumps.MenuItem("Reset", callback=self.reset_timer, key="r", icon="icons/reset.png", template=True)
 
         ## MENU
-        self.menus = {"default_menu" : 
-                [self.start_button, 
+        self.menus = {"default_menu" :
+                [self.project_button,
+                None,
+                self.start_button,
                 self.reset_button,
-                self.skip_button, 
-                None, 
+                self.skip_button,
+                None,
                 self.session_info,
                 self.end_session_button,
                 None,
-                [self.stats_today_submenu, 
+                [self.stats_today_submenu,
                     [self.stats_today_pomodoros,
-                    self.stats_today_breaks]],
-                [self.stats_week_submenu, 
+                    self.stats_today_breaks,
+                    self.stats_today_project,
+                    [self.stats_today_by_project, []]]],
+                [self.stats_week_submenu,
                     [self.stats_week_pomodoros,
-                    self.stats_week_breaks]],
+                    self.stats_week_breaks,
+                    self.stats_week_project,
+                    [self.stats_week_by_project, []]]],
                 None,
                 [self.preferences_button, 
                     [[self.pomodoro_length_button, 
@@ -230,6 +245,8 @@ class Tomado(object):
         self.load_timer("startup")
         # display the right preferences (sound toggle, sound select, autostart toggles)
         self.startup_display_preferences()
+        # build the project selector submenu
+        self._rebuild_project_menu()
     
     ## STATES AND MENUS
     def load_timer(self, sender):
@@ -411,6 +428,87 @@ class Tomado(object):
         # load todays stats from data
         self.load_stats(sender="")
     
+    ## PROJECTS
+    def _update_project_label(self):
+        current = self.prefs.get("current_project", "")
+        self.project_button.title = "● {}".format(current) if current else "○ No Project"
+
+    def _rebuild_project_menu(self):
+        for key in list(self.project_button.keys()):
+            self.project_button.pop(key)
+        current = self.prefs.get("current_project", "")
+        no_proj = rumps.MenuItem("No Project", callback=self.no_project)
+        no_proj.state = int(not current)
+        items = [no_proj]
+        for name in self.prefs.get("projects", []):
+            proj_item = rumps.MenuItem(name)
+            proj_item.state = int(name == current)
+            sel = rumps.MenuItem("Select", callback=self.select_project)
+            sel.project_name = name
+            ren = rumps.MenuItem("Rename…", callback=self.rename_project)
+            ren.project_name = name
+            dlt = rumps.MenuItem("Delete", callback=self.delete_project)
+            dlt.project_name = name
+            proj_item.update([sel, ren, dlt])
+            items.append(proj_item)
+        items.append(rumps.MenuItem("+ New Project…", callback=self.new_project))
+        self.project_button.update(items)
+        self._update_project_label()
+
+    def select_project(self, sender):
+        self.prefs["current_project"] = sender.project_name
+        save_file(self.prefs_path, self.prefs)
+        self._rebuild_project_menu()
+        self.load_stats(sender="")
+
+    def no_project(self, sender):
+        self.prefs["current_project"] = ""
+        save_file(self.prefs_path, self.prefs)
+        self._rebuild_project_menu()
+        self.load_stats(sender="")
+
+    def new_project(self, sender):
+        window = rumps.Window("Project name:", "+ New Project", default_text="")
+        response = window.run()
+        if not response.clicked:
+            return
+        name = response.text.strip()
+        if not name or name in self.prefs.get("projects", []):
+            return
+        self.prefs.setdefault("projects", []).append(name)
+        self.prefs["current_project"] = name
+        save_file(self.prefs_path, self.prefs)
+        self._rebuild_project_menu()
+        self.load_stats(sender="")
+
+    def rename_project(self, sender):
+        old_name = sender.project_name
+        window = rumps.Window("New name:", "Rename Project", default_text=old_name)
+        response = window.run()
+        if not response.clicked:
+            return
+        new_name = response.text.strip()
+        if not new_name or new_name == old_name or new_name in self.prefs.get("projects", []):
+            return
+        projects = self.prefs.get("projects", [])
+        projects[projects.index(old_name)] = new_name
+        if self.prefs.get("current_project") == old_name:
+            self.prefs["current_project"] = new_name
+        save_file(self.prefs_path, self.prefs)
+        self._rebuild_project_menu()
+        self.load_stats(sender="")
+
+    def delete_project(self, sender):
+        name = sender.project_name
+        projects = self.prefs.get("projects", [])
+        if name in projects:
+            projects.remove(name)
+        if self.prefs.get("current_project") == name:
+            self.prefs["current_project"] = ""
+        save_file(self.prefs_path, self.prefs)
+        self._rebuild_project_menu()
+        self.load_stats(sender="")
+
     ## STATS
     def save_interval(self, save_interval, save_length):
         """saves a just ended interval to the stats file, if it has a length of at least 1
@@ -446,6 +544,33 @@ class Tomado(object):
         self.stats_today_breaks.title = "{} Breaks = {}".format(s["today"]["breaks"], secs_to_time(s["today"]["break_time"], hours=True))
         self.stats_week_pomodoros.title = "{} Pomodoros = {}".format(s["week"]["pomodoros"], secs_to_time(s["week"]["pomodoro_time"], hours=True))
         self.stats_week_breaks.title = "{} Breaks = {}".format(s["week"]["breaks"], secs_to_time(s["week"]["break_time"], hours=True))
+
+        current = self.prefs.get("current_project", "")
+        self._update_stats_project_line(self.stats_today_project, s["today"], current)
+        self._update_stats_project_line(self.stats_week_project, s["week"], current)
+        self._rebuild_by_project_submenu(self.stats_today_by_project, s["today"]["by_project"])
+        self._rebuild_by_project_submenu(self.stats_week_by_project, s["week"]["by_project"])
+
+    def _update_stats_project_line(self, item, period_stats, current_project):
+        if current_project:
+            pd = period_stats["by_project"].get(current_project, {})
+            pomodoros = pd.get("pomodoros", 0)
+            ptime = pd.get("pomodoro_time", 0)
+            item.title = "● {}: {} 🍅  {}".format(current_project, pomodoros, secs_to_time(ptime, hours=True))
+        else:
+            item.title = "○ No active project"
+
+    def _rebuild_by_project_submenu(self, submenu_item, by_project_data):
+        for key in list(submenu_item.keys()):
+            submenu_item.pop(key)
+        if not by_project_data:
+            submenu_item.update([rumps.MenuItem("No data", callback=self.not_clickable_notification)])
+            return
+        items = []
+        for project, data in by_project_data.items():
+            label = "{}: {} 🍅  {}".format(project, data["pomodoros"], secs_to_time(data["pomodoro_time"], hours=True))
+            items.append(rumps.MenuItem(label, callback=self.not_clickable_notification))
+        submenu_item.update(items)
 
     ## PREFERENCES
     def startup_display_preferences(self):

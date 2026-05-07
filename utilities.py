@@ -127,6 +127,19 @@ def append_interval(path, interval_type, start, duration, project=""):
     save_file(path, stats)
 
 
+def _add_to_project(by_project, project, interval_type, duration):
+    if not project:
+        return
+    if project not in by_project:
+        by_project[project] = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0)
+    if interval_type == "pomodoro":
+        by_project[project]["pomodoros"] += 1
+        by_project[project]["pomodoro_time"] += duration
+    else:
+        by_project[project]["breaks"] += 1
+        by_project[project]["break_time"] += duration
+
+
 def compute_stats(stats, today):
     """Computes today's and this week's pomodoro/break counts and durations.
 
@@ -136,12 +149,12 @@ def compute_stats(stats, today):
 
     Returns:
         dict with keys 'today' and 'week', each containing:
-            pomodoros, pomodoro_time, breaks, break_time  (counts and seconds)
+            pomodoros, pomodoro_time, breaks, break_time, by_project
     """
     week_start = today - timedelta(days=today.weekday())
 
-    result_today = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0)
-    result_week  = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0)
+    result_today = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0, by_project={})
+    result_week  = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0, by_project={})
 
     for record in stats:
         try:
@@ -154,19 +167,24 @@ def compute_stats(stats, today):
 
         is_today = start_date == today
         duration = record.get("duration", 0)
+        project = record.get("project", "")
 
         if record.get("type") == "pomodoro":
             result_week["pomodoros"] += 1
             result_week["pomodoro_time"] += duration
+            _add_to_project(result_week["by_project"], project, "pomodoro", duration)
             if is_today:
                 result_today["pomodoros"] += 1
                 result_today["pomodoro_time"] += duration
+                _add_to_project(result_today["by_project"], project, "pomodoro", duration)
         else:
             result_week["breaks"] += 1
             result_week["break_time"] += duration
+            _add_to_project(result_week["by_project"], project, "break", duration)
             if is_today:
                 result_today["breaks"] += 1
                 result_today["break_time"] += duration
+                _add_to_project(result_today["by_project"], project, "break", duration)
 
     return {"today": result_today, "week": result_week}
 
