@@ -34,7 +34,7 @@ OPTIONS = {
     'plist': {
         'LSUIElement': True,
     },
-    'packages': ['rumps', 'pygame'],
+    'packages': ['rumps'],
     'iconfile': 'icons/tomado.icns',
 }
 

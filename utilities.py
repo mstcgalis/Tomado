@@ -13,11 +13,15 @@
 ################################################################################
 
 import json
+import os
 
 import rumps
-from pygame import mixer
+from AppKit import NSSound
 
-mixer.init()
+
+def load_sound(path):
+    return NSSound.alloc().initWithContentsOfFile_byReference_(os.path.abspath(path), True)
+
 
 def secs_to_time(seconds, hours=False):
     """Takes an integer of seconds and convertes it into a mm:ss string, or a HHh:MMm string
@@ -38,7 +42,7 @@ def secs_to_time(seconds, hours=False):
         return '{:02d}:{:02d}'.format(mins, secs)
 
 
-button_sound_playback = mixer.Sound('sounds/button.mp3')
+_button_sound = load_sound('sounds/button.mp3')
 
 def button_sound(allow_sound, sound_volume):
     """Plays a button-pressed feedback sound
@@ -48,10 +52,8 @@ def button_sound(allow_sound, sound_volume):
         sound_volume (float): the volume 0.1-1
     """
     if allow_sound:
-        button_sound_playback.set_volume(sound_volume)
-        button_sound_playback.play()
-    else:
-        pass
+        _button_sound.setVolume_(sound_volume)
+        _button_sound.play()
 
 def create_submenu(button_list, callback, type=""):
     """Creates a submenu containing rumps.MenuItem objects from a list of strings

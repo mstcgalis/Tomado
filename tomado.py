@@ -100,8 +100,8 @@ class Tomado(object):
             self.prefs = prefs_update(self.prefs, self.default_prefs)
             save_file(self.prefs_path, self.prefs)
         # setting up the playback object for notification sounds
-        self.notification_playback = mixer.Sound(self.prefs.get("timer_sound"))
-        self.notification_playback.set_volume(self.prefs.get("sound_volume"))
+        self.notification_playback = load_sound(self.prefs.get("timer_sound"))
+        self.notification_playback.setVolume_(self.prefs.get("sound_volume"))
         
         ## STATS
         # path to the stats file FIXME
@@ -657,8 +657,8 @@ class Tomado(object):
         sender.state = 1
         save_file(self.prefs_path, self.prefs)
         del self.notification_playback
-        self.notification_playback = mixer.Sound(self.prefs.get("timer_sound"))
-        self.notification_playback.set_volume(self.prefs.get("sound_volume"))
+        self.notification_playback = load_sound(self.prefs.get("timer_sound"))
+        self.notification_playback.setVolume_(self.prefs.get("sound_volume"))
     
     ## NOTIFICATIONS
     def interval_notification(self, type):
