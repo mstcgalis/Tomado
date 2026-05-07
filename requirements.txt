@@ -1,4 +1,0 @@
-pygame==2.1.2
-pyobjc-core==9.0
-pyobjc-framework-Cocoa==9.0
-rumps==0.4.0
