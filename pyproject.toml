@@ -1,6 +1,6 @@
 [project]
 name = "tomado"
-version = "0.2.4-alpha"
+version = "0.3.0"
 requires-python = ">=3.9, <3.10"
 dependencies = [
     "pyobjc-core==9.0",
