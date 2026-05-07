@@ -1,0 +1,39 @@
+[project]
+name = "tomado"
+version = "0.2.4-alpha"
+requires-python = ">=3.9, <3.10"
+dependencies = [
+    "pygame==2.1.2",
+    "pyobjc-core==9.0",
+    "pyobjc-framework-Cocoa==9.0",
+    "rumps==0.4.0",
+]
+
+[tool.uv]
+python-preference = "only-system"
+
+[dependency-groups]
+dev = [
+    "poethepoet",
+    "py2app",
+    "setuptools<80",
+]
+
+[tool.poe.tasks]
+app    = "python setup.py py2app"
+alias  = "python setup.py py2app -A"
+run    = "./dist/Tomado.app/Contents/MacOS/Tomado"
+clean  = {shell = "rm -rf build dist *.dmg"}
+dmg    = {shell = """
+    create-dmg \
+    --volname "Tomado Installer" \
+    --volicon "icons/tomado.icns" \
+    --window-pos 100 60 \
+    --window-size 430 270 \
+    --icon-size 100 \
+    --icon "Tomado.app" 100 100 \
+    --hide-extension "Tomado.app" \
+    --app-drop-link 300 100 \
+    "Tomado-Installer.dmg" \
+    "dist"
+"""}

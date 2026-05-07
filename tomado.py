@@ -256,7 +256,7 @@ class Tomado(object):
                 autostart = True
 
         # check wheter the session is not over aka there is not a bool value in session
-        if self.get_current_interval_type() == False:
+        if self.get_current_interval_type() is False:
             #if it is over, trigger a method for ending a session
             self.end_session(sender="loaded_state")
 
@@ -270,12 +270,18 @@ class Tomado(object):
             first_button = self.start_button
 
         # set the first button to either Start or Pause
-        try: self.swap_menu_item(self.start_button, first_button)
-        except: pass
-        try: self.swap_menu_item(self.pause_button, first_button)
-        except: pass
-        try: self.swap_menu_item(self.continue_button, first_button)
-        except: pass
+        try: 
+            self.swap_menu_item(self.start_button, first_button)
+        except: 
+            pass
+        try: 
+            self.swap_menu_item(self.pause_button, first_button)
+        except:
+            pass
+        try:
+            self.swap_menu_item(self.continue_button, first_button)
+        except: 
+            pass
 
         # update the menu buttons
         self.update_menu()
@@ -329,7 +335,7 @@ class Tomado(object):
             # if the bool is False aka the interval has not been completed
             if type(value) == bool:
                 # return the first word of interval key (pomodoro/break/long)
-                if full_text == True:
+                if full_text is True:
                     if interval.split("_")[0] == "long":
                         return "Long Break"
                     else:
@@ -361,7 +367,7 @@ class Tomado(object):
             # if the item starts with "pomodoro"
             if interval.split("_")[0] == "pomodoro":
                 # if the interval is the current interval and there is time in the timer
-                if interval == self.get_current_interval() and self.timer.is_alive() == True:
+                if interval == self.get_current_interval() and self.timer.is_alive() is True:
                     # add the half-full clock
                     string += self.config.get("clock_half")
                 # if the interval has a value type bool, aka it has not been started yet
@@ -437,7 +443,7 @@ class Tomado(object):
         Returns:
             bool: True if interval was saved
         """
-        if save_length <= 0 or not save_length or save_length == None:
+        if save_length <= 0 or not save_length or save_length is None:
             return False
 
         stats = open_file(self.stats_path)

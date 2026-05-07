@@ -12,9 +12,10 @@
 # 2022
 ################################################################################
 
-from pygame import mixer
 import json
+
 import rumps
+from pygame import mixer
 
 mixer.init()
 
@@ -93,8 +94,10 @@ def open_file(file_path):
         object: data form the file
     """
     with open(file_path) as f:
-        try: data = json.load(f)
-        except: data = {}
+        try: 
+            data = json.load(f)
+        except:
+            data = {}
     return data
 
 def prefs_update(prefs_og, prefs_new):
