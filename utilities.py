@@ -14,6 +14,7 @@
 
 import json
 import os
+from datetime import datetime, timedelta
 
 import rumps
 from AppKit import NSSound
@@ -101,6 +102,74 @@ def open_file(file_path):
         except:
             data = {}
     return data
+
+def read_stats(path):
+    """Returns the flat list of interval records from the stats file."""
+    try:
+        with open(path) as f:
+            data = json.load(f)
+            if isinstance(data, list):
+                return data
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+    return []
+
+
+def append_interval(path, interval_type, start, duration, project=""):
+    """Appends a completed interval record to the stats file."""
+    stats = read_stats(path)
+    stats.append({
+        "type": interval_type,
+        "start": start,
+        "duration": duration,
+        "project": project,
+    })
+    save_file(path, stats)
+
+
+def compute_stats(stats, today):
+    """Computes today's and this week's pomodoro/break counts and durations.
+
+    Args:
+        stats: flat list of interval records
+        today: datetime.date — the reference date
+
+    Returns:
+        dict with keys 'today' and 'week', each containing:
+            pomodoros, pomodoro_time, breaks, break_time  (counts and seconds)
+    """
+    week_start = today - timedelta(days=today.weekday())
+
+    result_today = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0)
+    result_week  = dict(pomodoros=0, pomodoro_time=0, breaks=0, break_time=0)
+
+    for record in stats:
+        try:
+            start_date = datetime.fromisoformat(record["start"]).date()
+        except (KeyError, ValueError):
+            continue
+
+        if start_date < week_start:
+            continue
+
+        is_today = start_date == today
+        duration = record.get("duration", 0)
+
+        if record.get("type") == "pomodoro":
+            result_week["pomodoros"] += 1
+            result_week["pomodoro_time"] += duration
+            if is_today:
+                result_today["pomodoros"] += 1
+                result_today["pomodoro_time"] += duration
+        else:
+            result_week["breaks"] += 1
+            result_week["break_time"] += duration
+            if is_today:
+                result_today["breaks"] += 1
+                result_today["break_time"] += duration
+
+    return {"today": result_today, "week": result_week}
+
 
 def prefs_update(prefs_og, prefs_new):
     """updates the prefs saved by user to be compatible with a new version, keeping the user selected values

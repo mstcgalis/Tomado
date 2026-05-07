@@ -14,8 +14,11 @@
 
 __version__ = "0.2.4-alpha"
 
-import rumps
+import json
 import time
+from datetime import date, datetime
+
+import rumps
 
 from utilities import *
 
@@ -81,7 +84,8 @@ class Tomado(object):
             "autostart_session": False,
             "allow_sound": True,
             "sound_volume": 1,
-            "timer_sound": "sounds/beep.mp3"
+            "timer_sound": "sounds/beep.mp3",
+            "current_project": ""
         }
         # path to the preferences file
         self.prefs_path = str(self.folder + "/prefs.json")
@@ -104,15 +108,12 @@ class Tomado(object):
         self.notification_playback.setVolume_(self.prefs.get("sound_volume"))
         
         ## STATS
-        # path to the stats file FIXME
         self.stats_path = str(self.folder + '/stats.json')
-        # for test purposes use: 
-        #   self.stats_path = str('testfiles/stats.json')
-        # if stats file doesnt exist, create it
-        with open(self.stats_path, "a") as f:
-            pass
-        # variable storing the date and time at which the curretn interval started
-        self.interval_start = 0
+        # initialise with empty list if missing or in the old dict format
+        if not read_stats(self.stats_path):
+            save_file(self.stats_path, [])
+        # ISO timestamp set when an interval starts, used as the record's start time
+        self.interval_start = ""
 
         ## GENERAL BUTTONS
         # non clickable button showing info about current session
@@ -123,7 +124,7 @@ class Tomado(object):
         self.about_button = rumps.MenuItem("About {}".format(self.config.get("app_name")), callback=self.about_info)
         
         # preferences button
-        self.prefereces_button = rumps.MenuItem("Preferences")
+        self.preferences_button = rumps.MenuItem("Preferences")
         # pomodoro interval preference
         self.pomodoro_length_button = rumps.MenuItem("Pomodoro Length")
         self.pomodoro_length_options = create_submenu(self.config.get("pomodoro_length_options"), self.change_length, "pomodoro")
@@ -136,8 +137,8 @@ class Tomado(object):
         # autostart pomodoros toggle
         self.autostart_pomodoro_button = rumps.MenuItem("Autostart Pomodoros", callback=self.autostart_toggle)
         self.autostart_pomodoro_button.type = "pomodoro"
-        # autostart breakes toggle
-        self.autostart_break_button = rumps.MenuItem("Autostart Breakes", callback=self.autostart_toggle)
+        # autostart breaks toggle
+        self.autostart_break_button = rumps.MenuItem("Autostart Breaks", callback=self.autostart_toggle)
         self.autostart_break_button.type = "break"
         # autostart session toggle
         self.autostart_session_button = rumps.MenuItem("Autostart Sessions", callback=self.autostart_toggle)
@@ -159,11 +160,11 @@ class Tomado(object):
         self.stats_today_pomodoros.icon = self.config.get("pomodoro_symbol")
         self.stats_week_pomodoros = rumps.MenuItem("Pomodoros:", callback=self.not_clickable_notification)
         self.stats_week_pomodoros.icon = self.config.get("pomodoro_symbol")
-        # shows breakes tracked today / this week
-        self.stats_today_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable_notification)
-        self.stats_today_breakes.icon = self.config.get("break_symbol")
-        self.stats_week_breakes = rumps.MenuItem("Breakes:", callback=self.not_clickable_notification)
-        self.stats_week_breakes.icon = self.config.get("break_symbol")
+        # shows breaks tracked today / this week
+        self.stats_today_breaks = rumps.MenuItem("Breaks:", callback=self.not_clickable_notification)
+        self.stats_today_breaks.icon = self.config.get("break_symbol")
+        self.stats_week_breaks = rumps.MenuItem("Breaks:", callback=self.not_clickable_notification)
+        self.stats_week_breaks.icon = self.config.get("break_symbol")
 
 
         ## TIMER BUTTONS
@@ -189,12 +190,12 @@ class Tomado(object):
                 None,
                 [self.stats_today_submenu, 
                     [self.stats_today_pomodoros,
-                    self.stats_today_breakes]],
+                    self.stats_today_breaks]],
                 [self.stats_week_submenu, 
                     [self.stats_week_pomodoros,
-                    self.stats_week_breakes]],
+                    self.stats_week_breaks]],
                 None,
-                [self.prefereces_button, 
+                [self.preferences_button, 
                     [[self.pomodoro_length_button, 
                         self.pomodoro_length_options], 
                     [self.break_length_button, 
@@ -243,16 +244,15 @@ class Tomado(object):
         self.timer.count = 0
 
         autostart = False
+        interval_type = self.get_current_interval_type()
         if sender == "end_session":
             autostart = self.prefs.get("autostart_session")
         else:
-            if self.prefs.get("autostart_pomodoro") and self.get_current_interval_type() == "pomodoro":
+            if self.prefs.get("autostart_pomodoro") and interval_type == "pomodoro":
                 autostart = True
-            if self.prefs.get("autostart_break") and self.get_current_interval_type() == "break":
+            elif self.prefs.get("autostart_break") and interval_type in ("break", "long"):
                 autostart = True
-            if self.prefs.get("autostart_break") and self.get_current_interval_type() == "long":
-                autostart = True
-            if self.prefs.get("autostart_session") and not self.get_current_interval_type():
+            elif self.prefs.get("autostart_session") and not interval_type:
                 autostart = True
 
         # check wheter the session is not over aka there is not a bool value in session
@@ -333,7 +333,7 @@ class Tomado(object):
         # loop through the session, getting the interval key and the bool value
         for interval, value in self.session_current.items():
             # if the bool is False aka the interval has not been completed
-            if type(value) == bool:
+            if isinstance(value, bool):
                 # return the first word of interval key (pomodoro/break/long)
                 if full_text is True:
                     if interval.split("_")[0] == "long":
@@ -354,7 +354,7 @@ class Tomado(object):
         # loop through the session, getting the interval key and the bool value
         for interval, value in self.session_current.items():
             # if the bool is False aka the interval has not been completed
-            if type(value) == bool:
+            if isinstance(value, bool):
                 # return the first word of interval key (pomodoro/break/long)
                 return interval
     
@@ -393,7 +393,7 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        if type(sender) == rumps.rumps.MenuItem:
+        if isinstance(sender, rumps.MenuItem):
             button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
         # stop the timer
         self.timer.stop()
@@ -401,27 +401,6 @@ class Tomado(object):
         if sender != "loaded_state":
             # save interval
             self.save_interval(self.get_current_interval_type(), self.timer.count - 1)
-
-        # open the data dictionary from json
-        stats = {}
-        stats = open_file(self.stats_path)
-
-        # adds end time to current session
-        current_week = time.strftime("%Y_%W", time.localtime(time.time()))
-        current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
-        current_time = time.strftime("%H:%M%:%S", time.localtime(time.time()))
-
-        if current_week in stats:
-            sessions = stats[current_week]
-            for session_id in sessions:
-                if "-" not in session_id:  # session has not ended yet
-                    intervals = sessions[session_id]
-                    new_session_id = "{}-{}_{}".format(session_id, current_date, current_time)
-                    sessions[new_session_id] = intervals
-                    del sessions[session_id]
-                    break
-
-        save_file(self.stats_path, stats)
 
         self.session_current.clear()
         self.load_session()
@@ -434,7 +413,7 @@ class Tomado(object):
     
     ## STATS
     def save_interval(self, save_interval, save_length):
-        """saves a just ended interval to the stats file, if it has a length of atleast 1
+        """saves a just ended interval to the stats file, if it has a length of at least 1
 
         Args:
             save_interval (string): type of interval
@@ -443,39 +422,16 @@ class Tomado(object):
         Returns:
             bool: True if interval was saved
         """
-        if save_length <= 0 or not save_length or save_length is None:
+        if not save_length or save_length <= 0:
             return False
-
-        stats = open_file(self.stats_path)
-        
-        current_week = time.strftime("%Y_%W", time.localtime(time.time()))
-        current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
-        current_time = time.strftime("%H:%M%:%S", time.localtime(time.time()))
-
-        # if the interval didnt start today, save it to the day it started
-        if self.interval_start != current_date:
-            current_date = self.interval_start
-            current_time = "00:00:00"
-
-        if current_week in stats:
-            sessions = stats[current_week]
-        else:
-            sessions = {}
-            stats[current_week] = sessions
-
-        if len(sessions) > 0:
-            session_id, intervals = list(sessions.items())[-1]
-            if "-" not in session_id:  # session has not ended yet
-                intervals_update = {"{}_{}_{}".format(save_interval, current_date, current_time): save_length}
-                intervals.update(intervals_update)
-                save_file(self.stats_path, stats)
-                return True  # saved interval into current session
-
-        session_id = "{}_{}".format(current_date, current_time)
-        intervals = {"{}_{}_{}".format(save_interval, current_date, current_time): save_length}
-        sessions[session_id] = intervals
-        save_file(self.stats_path, stats)
-        return True  # created new session and save interval
+        append_interval(
+            self.stats_path,
+            save_interval,
+            self.interval_start or datetime.now().isoformat(timespec='seconds'),
+            save_length,
+            self.prefs.get("current_project", ""),
+        )
+        return True
 
     def load_stats(self, sender):
         """loads stats from stats file and displays them in the menu (daily and weekly)
@@ -483,62 +439,22 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        # daily stat vars
-        today_pomodoros = 0
-        today_pomodoros_time = 0
-        today_breakes = 0
-        today_breakes_time = 0
-        # weekly stat vars
-        week_pomodoros = 0
-        week_pomodoros_time = 0
-        week_breakes = 0
-        week_breakes_time = 0
-        
-        stats = open_file(self.stats_path)
+        stats = read_stats(self.stats_path)
+        s = compute_stats(stats, date.today())
 
-        current_week = time.strftime("%Y_%W", time.localtime(time.time()))
-        current_date = time.strftime("%m.%d%.", time.localtime(time.time()))
-
-        for session, intervals in stats.get(current_week, {}).items():
-            # get weekly stats
-            for interval, length in intervals.items():
-                interval_type, interval_date, interval = interval.split("_")
-                if interval_type == "pomodoro":
-                    week_pomodoros_time += length
-                    week_pomodoros += 1
-                    if interval_date == current_date:
-                        today_pomodoros_time += length
-                        today_pomodoros += 1
-                else:
-                    week_breakes_time += length
-                    week_breakes += 1
-                    if interval_date == current_date:
-                        today_breakes_time += length
-                        today_breakes += 1
-
-        # update the submenus
-        self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(today_pomodoros, secs_to_time(today_pomodoros_time, hours=True))
-        self.stats_today_breakes.title = "{} Breakes = {}".format(today_breakes, secs_to_time(today_breakes_time, hours=True))
-        self.stats_week_pomodoros.title = "{} Pomodoros = {}".format(week_pomodoros, secs_to_time(week_pomodoros_time, hours=True))
-        self.stats_week_breakes.title = "{} Breakes = {}".format(week_breakes, secs_to_time(week_breakes_time, hours=True))
+        self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(s["today"]["pomodoros"], secs_to_time(s["today"]["pomodoro_time"], hours=True))
+        self.stats_today_breaks.title = "{} Breaks = {}".format(s["today"]["breaks"], secs_to_time(s["today"]["break_time"], hours=True))
+        self.stats_week_pomodoros.title = "{} Pomodoros = {}".format(s["week"]["pomodoros"], secs_to_time(s["week"]["pomodoro_time"], hours=True))
+        self.stats_week_breaks.title = "{} Breaks = {}".format(s["week"]["breaks"], secs_to_time(s["week"]["break_time"], hours=True))
 
     ## PREFERENCES
     def startup_display_preferences(self):
         """displays correct preferences (from prefs file) on start up
         """
         # AUTOSTART
-        if self.prefs.get("autostart_pomodoro"):
-            self.autostart_pomodoro_button.state = 1
-        else:
-            self.autostart_pomodoro_button.state = 0
-        if self.prefs.get("autostart_break"):
-            self.autostart_break_button.state = 1
-        else:
-            self.autostart_break_button.state = 0
-        if self.prefs.get("autostart_session"):
-            self.autostart_session_button.state = 1
-        else:
-            self.autostart_session_button.state = 0
+        self.autostart_pomodoro_button.state = int(bool(self.prefs.get("autostart_pomodoro")))
+        self.autostart_break_button.state = int(bool(self.prefs.get("autostart_break")))
+        self.autostart_session_button.state = int(bool(self.prefs.get("autostart_session")))
         # INTERVAL LENGHTS
         # loop through a list of the lists of options
         option_lists = [self.pomodoro_length_options, self.break_length_options, self.long_length_options]
@@ -549,10 +465,7 @@ class Tomado(object):
                     # make the button active
                     option.state = 1
         # SOUND TOGGLE
-        if self.prefs.get("allow_sound"):
-            self.allow_sounds_button.state = 1
-        else:
-            self.allow_sounds_button.state = 0
+        self.allow_sounds_button.state = int(bool(self.prefs.get("allow_sound")))
         # SOUND VOLUME
         for option in self.sound_volume_options:
             if int(option.title.strip("%"))/100 == self.prefs.get("sound_volume"):
@@ -589,13 +502,11 @@ class Tomado(object):
         # change the interval length value in prefs
         self.prefs["{}_length".format(sender.type)] = int(sender.title.split()[0]) * 60
         
-        # get the type of interval and select the matching list of option buttons
-        if sender.type == "pomodoro":
-            options = self.pomodoro_length_options
-        if sender.type == "break":
-            options = self.break_length_options
-        if sender.type == "long":
-            options = self.long_length_options
+        options = {
+            "pomodoro": self.pomodoro_length_options,
+            "break": self.break_length_options,
+            "long": self.long_length_options,
+        }[sender.type]
         # loop through the options
         for option in options:
             # make them inactive
@@ -640,7 +551,7 @@ class Tomado(object):
                 break
         sender.state = 1
         save_file(self.prefs_path, self.prefs)
-        self.notification_playback.set_volume(self.prefs.get("sound_volume"))
+        self.notification_playback.setVolume_(self.prefs.get("sound_volume"))
 
     def change_sound(self, sender):
         """changes the sound that notifies the user at the end of the interval in prefs
@@ -675,7 +586,7 @@ class Tomado(object):
         if self.prefs.get("allow_sound"):
             self.notification_playback.play()
 
-    def not_clickable_notification(self):
+    def not_clickable_notification(self, sender=None):
         """notidies the user when a non clickable MenuItem is pressed
         """
         rumps.notification(
@@ -710,7 +621,7 @@ class Tomado(object):
             sender (string, MenuItem): information on the sender
         """
         # check if the function is being triggered by a button
-        if type(sender) == rumps.rumps.MenuItem:
+        if isinstance(sender, rumps.MenuItem):
             button_sound(self.prefs.get("allow_sound"), self.prefs.get("sound_volume"))
             # replace the start button to the pause button
             self.swap_menu_item(self.start_button, self.pause_button)
@@ -720,8 +631,7 @@ class Tomado(object):
         self.timer.start()
         self.update_session_info()
 
-        # change the interval start var to the current date
-        self.interval_start = time.strftime("%m.%d%.", time.localtime(time.time()))
+        self.interval_start = datetime.now().isoformat(timespec='seconds')
     
     def stop_timer(self):
         """stops the loaded interval
