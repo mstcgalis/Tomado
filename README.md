@@ -17,7 +17,7 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 
 ## Installation
 
-1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.3.0) (v0.3.0)
+1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.3.1) (v0.3.1)
 2. Mount the `.dmg` and move Tomado to `Applications`
 3. Open Tomado
 4. Go to `System Settings → Privacy & Security → General → Open Anyway`
@@ -25,7 +25,7 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 
 ## Building from source
 
-Requires Python 3.9 (framework build) and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.10+ (framework build) and [uv](https://docs.astral.sh/uv/).
 
 ```sh
 git clone https://github.com/mstcgalis/Tomado.git
