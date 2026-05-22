@@ -1,6 +1,7 @@
 [project]
 name = "tomado"
 version = "0.3.1"
+license = {text = "AGPL-3.0-only"}
 requires-python = ">=3.10"
 dependencies = [
     "pyobjc-core==12.1",

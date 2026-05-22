@@ -8,7 +8,7 @@
 #           Discord: @danielmstc#2967
 #           Are.na: are.na/daniel-galis
 #
-# License:  GPL v3
+# License:  AGPL-3.0
 # 2022
 ################################################################################
 
