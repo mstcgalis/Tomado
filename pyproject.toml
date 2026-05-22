@@ -1,10 +1,10 @@
 [project]
 name = "tomado"
-version = "0.3.0"
-requires-python = ">=3.9, <3.10"
+version = "0.3.1"
+requires-python = ">=3.10"
 dependencies = [
-    "pyobjc-core==9.0",
-    "pyobjc-framework-Cocoa==9.0",
+    "pyobjc-core==12.1",
+    "pyobjc-framework-Cocoa==12.1",
     "rumps==0.4.0",
 ]
 

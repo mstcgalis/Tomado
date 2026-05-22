@@ -30,7 +30,7 @@ class py2app(_py2app):
 APP = ['tomado.py']
 DATA_FILES = ['icons', 'sounds']
 OPTIONS = {
-    'argv_emulation': True,
+    'argv_emulation': False,
     'plist': {
         'LSUIElement': True,
     },
