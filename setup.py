@@ -33,6 +33,8 @@ OPTIONS = {
     'argv_emulation': False,
     'plist': {
         'LSUIElement': True,
+        'CFBundleName': 'Tomado',
+        'CFBundleDisplayName': 'Tomado',
     },
     'packages': ['rumps'],
     'iconfile': 'icons/tomado.icns',

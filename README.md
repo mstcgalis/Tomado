@@ -17,7 +17,7 @@ Please create a Pull Request or Issue if you encounter an error. I'm also always
 
 ## Installation
 
-1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.3.1) (v0.3.1)
+1. Download `Tomado-Installer.dmg` from the latest [release](https://github.com/mstcgalis/Tomado/releases/tag/v0.3.2) (v0.3.2)
 2. Mount the `.dmg` and move Tomado to `Applications`
 3. Open Tomado
 4. Go to `System Settings → Privacy & Security → General → Open Anyway`

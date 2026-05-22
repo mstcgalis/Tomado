@@ -200,7 +200,7 @@ wheels = [
 
 [[package]]
 name = "tomado"
-version = "0.3.0"
+version = "0.3.2"
 source = { virtual = "." }
 dependencies = [
     { name = "pyobjc-core" },

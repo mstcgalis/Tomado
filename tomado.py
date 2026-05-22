@@ -12,7 +12,7 @@
 # 2022
 ################################################################################
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 import csv
 import json
@@ -561,13 +561,13 @@ class Tomado(object):
         stats = read_stats(self.stats_path)
         s = compute_stats(stats, date.today())
 
-        self.stats_today_pomodoros.title = "{} Pomodoros = {}".format(s["today"]["pomodoros"], secs_to_time(s["today"]["pomodoro_time"], hours=True))
-        self.stats_today_breaks.title = "{} Breaks = {}".format(s["today"]["breaks"], secs_to_time(s["today"]["break_time"], hours=True))
-        self.stats_week_pomodoros.title = "{} Pomodoros = {}".format(s["week"]["pomodoros"], secs_to_time(s["week"]["pomodoro_time"], hours=True))
-        self.stats_week_breaks.title = "{} Breaks = {}".format(s["week"]["breaks"], secs_to_time(s["week"]["break_time"], hours=True))
+        self.stats_today_pomodoros.title = "{}   {}".format(s["today"]["pomodoros"], secs_to_time(s["today"]["pomodoro_time"], hours=True))
+        self.stats_today_breaks.title = "{}   {}".format(s["today"]["breaks"], secs_to_time(s["today"]["break_time"], hours=True))
+        self.stats_week_pomodoros.title = "{}   {}".format(s["week"]["pomodoros"], secs_to_time(s["week"]["pomodoro_time"], hours=True))
+        self.stats_week_breaks.title = "{}   {}".format(s["week"]["breaks"], secs_to_time(s["week"]["break_time"], hours=True))
 
-        self.stats_all_time_pomodoros.title = "{} Pomodoros = {}".format(s["all_time"]["pomodoros"], secs_to_time(s["all_time"]["pomodoro_time"], hours=True))
-        self.stats_all_time_breaks.title = "{} Breaks = {}".format(s["all_time"]["breaks"], secs_to_time(s["all_time"]["break_time"], hours=True))
+        self.stats_all_time_pomodoros.title = "{}   {}".format(s["all_time"]["pomodoros"], secs_to_time(s["all_time"]["pomodoro_time"], hours=True))
+        self.stats_all_time_breaks.title = "{}   {}".format(s["all_time"]["breaks"], secs_to_time(s["all_time"]["break_time"], hours=True))
 
         current = self.prefs.get("current_project", "")
         self._update_stats_project_line(self.stats_today_project, s["today"], current)
@@ -592,9 +592,10 @@ class Tomado(object):
         if not by_project_data:
             submenu_item.update([rumps.MenuItem("No data", callback=self.not_clickable_notification)])
             return
+        max_len = max(len(p) for p in by_project_data)
         items = []
         for project, data in by_project_data.items():
-            label = "{}: {} 🍅  {}".format(project, data["pomodoros"], secs_to_time(data["pomodoro_time"], hours=True))
+            label = "{:<{}}  🍅 {:>2}   {}".format(project, max_len, data["pomodoros"], secs_to_time(data["pomodoro_time"], hours=True))
             items.append(rumps.MenuItem(label, callback=self.not_clickable_notification))
         submenu_item.update(items)
 
@@ -894,7 +895,11 @@ class Tomado(object):
         Args:
             sender (string, MenuItem): information on the sender
         """
-        rumps.alert("About Tomado", "made with ❤️, care and patience by Daniel Gális \ndanielgalis.com \n\npart of self.governance(software)\n\n{}\n2022\nGPL-3.0 License".format(__version__))
+        rumps.alert(
+            "About Tomado",
+            "made with ❤️, care and patience by\nDaniel Gális — dgalis.sk"
+            "\n\n{}\n2026 · AGPL-3.0".format(__version__)
+        )
     
     ## APP
     def run(self):
